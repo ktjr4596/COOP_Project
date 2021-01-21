@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UCameraComponent;
+
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
 {
@@ -27,6 +29,13 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	// Movement
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCameraComponent* CameraComp;
+
 };
