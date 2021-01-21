@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{F1D25090-4306-3998-E779-58B895D1D5B3}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "MyCoopGame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

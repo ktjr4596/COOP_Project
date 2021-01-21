@@ -1,0 +1,8 @@
+## ignore Files ##
+
+Content/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+Config/
