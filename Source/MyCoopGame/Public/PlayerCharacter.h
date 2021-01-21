@@ -7,6 +7,7 @@
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
+class USpringArmComponent;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -33,9 +34,15 @@ protected:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
+	void BeginCrouch();
+	void EndCrouch();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USpringArmComponent* SpringArmComp;
 
 };
