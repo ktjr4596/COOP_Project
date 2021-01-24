@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "WeaponBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -29,6 +30,11 @@ APlayerCharacter::APlayerCharacter()
 	// Set Character can crouch
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	bHasWeapon = false;
+
+	// character movement followed by camera's direction
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
@@ -60,18 +66,34 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// Bind Action
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginCrouch);
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &APlayerCharacter::BeginCrouch);
+	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &APlayerCharacter::EndCrouch);
+
+	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+
+	PlayerInputComponent->BindAction("EquipWeapon", EInputEvent::IE_Pressed, this, &APlayerCharacter::EquipWeapon);
+
 
 }
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	AddMovementInput(GetActorForwardVector()*Value);
+	FVector MoveDirection;
+	if (true == bHasWeapon)
+	{
+		MoveDirection = GetActorForwardVector();
+	}
+	else
+	{
+		FRotator CamRotator = CameraComp->GetComponentRotation();
+		FRotator Yaw(0.0f, CamRotator.Yaw, 0.0f);
+		MoveDirection = FRotationMatrix(Yaw).GetUnitAxis(EAxis::X);
+	}
+	AddMovementInput(MoveDirection*Value);
 }
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	AddMovementInput(GetActorRightVector()*Value);
+	AddMovementInput(CameraComp->GetRightVector()*Value);
 }
 
 void APlayerCharacter::BeginCrouch()
@@ -82,5 +104,26 @@ void APlayerCharacter::BeginCrouch()
 void APlayerCharacter::EndCrouch()
 {
 	UnCrouch();
+}
+
+void APlayerCharacter::EquipWeapon()
+{
+	if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
+	{
+		return;
+	}
+
+	bHasWeapon = !bHasWeapon;
+	if (true == bHasWeapon)
+	{
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	}
+	else
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
 }
 

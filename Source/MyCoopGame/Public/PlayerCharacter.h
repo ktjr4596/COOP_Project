@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class AWeaponBase;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -37,6 +38,7 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 
+	void EquipWeapon();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -44,5 +46,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	AWeaponBase* Weapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	bool bHasWeapon;
+
+	
 
 };
