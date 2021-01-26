@@ -7,6 +7,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "WeaponBase.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -50,6 +53,24 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	FVector EyeLocation;
+	FRotator EyeRotator;
+	GetActorEyesViewPoint(EyeLocation,EyeRotator);
+
+	FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*10000.0f);
+	FVector BoxHalfSize(20.0f, 20.0f, 20.0f);
+
+	TArray<AActor*> IgnoredActor;
+	IgnoredActor.Add(this);
+	FHitResult HitResult;
+	if (true == UKismetSystemLibrary::BoxTraceSingle(GetWorld(), EyeLocation, TraceEndPoint, BoxHalfSize, EyeRotator, ETraceTypeQuery::TraceTypeQuery1, false, IgnoredActor, EDrawDebugTrace::ForOneFrame, HitResult, true))
+	{
+		// 블락된 아이템 텍스트 띄우기
+
+	}
+
+
 }
 
 // Called to bind functionality to input
@@ -72,7 +93,19 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("EquipWeapon", EInputEvent::IE_Pressed, this, &APlayerCharacter::EquipWeapon);
 
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
 
+
+}
+
+FVector APlayerCharacter::GetPawnViewLocation() const
+{
+	if (nullptr != CameraComp)
+	{
+		return CameraComp->GetComponentLocation();
+	}
+
+	return Super::GetPawnViewLocation();
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -124,6 +157,14 @@ void APlayerCharacter::EquipWeapon()
 	{
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+}
+
+void APlayerCharacter::UseWeapon()
+{
+	if (nullptr != Weapon)
+	{
+		Weapon->Use();
 	}
 }
 

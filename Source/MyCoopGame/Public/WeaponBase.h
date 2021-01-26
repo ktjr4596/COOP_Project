@@ -6,6 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "WeaponBase.generated.h"
 
+UENUM(Blueprintable)
+enum class EWeaponType :uint8
+{
+	WeaponType_Knife,
+	WeaponType_Rifle,
+	WeaponType_Count
+};
+
+
 UCLASS(Abstract)
 class MYCOOPGAME_API AWeaponBase : public AActor
 {
@@ -27,4 +36,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category= "Components")
 	USkeletalMeshComponent* MeshComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	FName MuzzleSocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	EWeaponType WeaponType;
 };

@@ -30,6 +30,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual FVector GetPawnViewLocation() const override;
+
 protected:
 	// Movement
 	void MoveForward(float Value);
@@ -39,6 +41,9 @@ protected:
 	void EndCrouch();
 
 	void EquipWeapon();
+
+protected:
+	void UseWeapon();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
