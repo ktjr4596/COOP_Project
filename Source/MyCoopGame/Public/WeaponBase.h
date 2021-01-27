@@ -37,9 +37,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category= "Components")
 	USkeletalMeshComponent* MeshComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	FName MuzzleSocketName;
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	TSubclassOf<class UDamageType> DamageType;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Damage")
+	float DamageBase;
+
+	
 };
