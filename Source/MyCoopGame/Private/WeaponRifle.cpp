@@ -18,8 +18,6 @@ AWeaponRifle::AWeaponRifle()
 
 }
 
-
-
 void AWeaponRifle::Use()
 {
 	AActor* MyOwner = GetOwner();
@@ -28,9 +26,8 @@ void AWeaponRifle::Use()
 		FVector EyeLocation;
 		FRotator EyeRotator;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotator);
-		FTransform MuzzleTransform = MeshComp->GetSocketTransform(MuzzleSocketName,RTS_World);
 
-		FVector MuzzleLocation = MuzzleTransform.GetLocation();
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 		FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*10000.0f);
 
 		FCollisionQueryParams QueryParams;

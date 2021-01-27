@@ -226,26 +226,28 @@ void APlayerCharacter::LootItem()
 {
 	if (nullptr != TargetItem)
 	{
-		if (nullptr != Weapon)
+		if (true == TargetItem->GetClass()->IsChildOf(AWeaponBase::StaticClass()))
 		{
-			Weapon->Destroy();
-			Weapon = nullptr;
-		}
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			if (nullptr != Weapon)
+			{
+				GetWorld()->DestroyActor(Weapon);
+				Weapon = nullptr;
+			}
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		AWeaponBase* NewWeapon= GetWorld()->SpawnActor<AWeaponBase>(TargetItem->GetClass(), GetActorTransform(), SpawnParams);
-		if (nullptr != NewWeapon)
-		{
-			Weapon = NewWeapon;
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget,false);
-		
-			Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+			AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(TargetItem->GetClass(), GetActorTransform(), SpawnParams);
+			if (nullptr != NewWeapon)
+			{
+				Weapon = NewWeapon;
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
 
-			Weapon->SetActorEnableCollision(false);
+				Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+
+				Weapon->SetActorEnableCollision(false);
+			}
 		}
-		
 	}
 }
 
