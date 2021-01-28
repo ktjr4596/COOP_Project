@@ -31,6 +31,9 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	virtual void Use() PURE_VIRTUAL(AWeaponBase::Use, ;);
+	
+	UFUNCTION(BlueprintCallable ,Category="Weapon")
+	virtual void UnUse();
 
 protected:
 

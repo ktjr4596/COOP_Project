@@ -23,6 +23,13 @@ public:
 public:
 	virtual void Use() override final;
 
+	virtual void UnUse() override;
+
+protected:
+	void Fire();
+
+	void StopFire();
+
 protected:
 	void PlayFireEffect();
 
@@ -34,11 +41,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+protected:
+
+	FTimerHandle TimerHandle_Firing;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	FName TracerEffectPointName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	TSubclassOf<UCameraShake> FireCamShake;
 
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	UParticleSystem* MuzzleEffect;
@@ -49,6 +64,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FleshFX")
 	UParticleSystem* FleshEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category="Camera")
-	TSubclassOf< UCameraShake> FireCamShake;
+	/** Firing Ammo per minute */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
+	float RateOfFire;
+
+	float LastFireTime;
+
+	float TimeBetweenShots;
 };

@@ -20,3 +20,7 @@ void AWeaponBase::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+void AWeaponBase::UnUse()
+{
+}

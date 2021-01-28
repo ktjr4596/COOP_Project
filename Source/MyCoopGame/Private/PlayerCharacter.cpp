@@ -142,6 +142,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &APlayerCharacter::UnUseWeapon);
 
 	PlayerInputComponent->BindAction("Loot", EInputEvent::IE_Pressed, this, &APlayerCharacter::LootItem);
 }
@@ -257,6 +258,14 @@ void APlayerCharacter::UseWeapon()
 	if (true==bHasWeapon&& nullptr != Weapon)
 	{
 		Weapon->Use();
+	}
+}
+
+void APlayerCharacter::UnUseWeapon()
+{
+	if (true == bHasWeapon && nullptr != Weapon)
+	{
+		Weapon->UnUse();
 	}
 }
 

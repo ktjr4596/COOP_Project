@@ -50,6 +50,8 @@ protected:
 
 protected:
 	void UseWeapon();
+	void UnUseWeapon();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

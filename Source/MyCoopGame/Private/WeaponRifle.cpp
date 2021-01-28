@@ -9,6 +9,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "../MyCoopGame.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "GameFramework/Actor.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for weapons"), ECVF_Cheat);
@@ -16,10 +17,21 @@ FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugW
 AWeaponRifle::AWeaponRifle()
 	:AWeaponBase()
 {
-
 }
 
 void AWeaponRifle::Use()
+{
+	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds,0.0f);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_Firing, this, &AWeaponRifle::Fire, TimeBetweenShots, true, FirstDelay);
+}
+
+void AWeaponRifle::UnUse()
+{
+	StopFire();
+}
+
+void AWeaponRifle::Fire()
 {
 	AActor* MyOwner = GetOwner();
 	if (nullptr != MyOwner)
@@ -40,12 +52,12 @@ void AWeaponRifle::Use()
 		FHitResult HitResult;
 		if (true == GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, TraceEndPoint, COLLISION_WEAPON, QueryParams))
 		{
-			AActor* HitActor= HitResult.GetActor();
-			
-			
-			EPhysicalSurface HitSurfaceType= UPhysicalMaterial::DetermineSurfaceType( HitResult.PhysMaterial.Get());
+			AActor* HitActor = HitResult.GetActor();
 
-		
+
+			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+
+
 			float ActualDamage = DamageBase;
 
 			if (SURFACETYPE_FLESHVLUNERABLE == HitSurfaceType)
@@ -67,9 +79,14 @@ void AWeaponRifle::Use()
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEndPoint, FColor::Red, false, 5.0f, 0, 1.0f);
 		}
 
-		
-	}
+		LastFireTime = GetWorld()->TimeSeconds;
 
+	}
+}
+
+void AWeaponRifle::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_Firing);
 }
 
 void AWeaponRifle::PlayFireEffect()
@@ -125,5 +142,7 @@ void AWeaponRifle::PlayTraceEffect()
 void AWeaponRifle::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TimeBetweenShots = 60.0f / RateOfFire;
 
 }
