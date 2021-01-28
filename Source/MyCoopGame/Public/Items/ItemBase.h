@@ -3,49 +3,38 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameFramework/Actor.h"
 #include "ItemBase.generated.h"
 
-
-class UTexture2D;
-class UStaticMesh;
-class UInventoryComponent;
 class APlayerCharacter;
-/**
- * 
- */
-UCLASS(Abstract, BlueprintType, Blueprintable, EditInlineNew, DefaultToInstanced)
-class MYCOOPGAME_API UItemBase : public UObject
+class UStaticMesh;
+class UTexture2D;
+class UInventoryComponent;
+
+
+UCLASS(Abstract,BlueprintType,Blueprintable)
+class MYCOOPGAME_API AItemBase : public AActor
 {
 	GENERATED_BODY()
 	
-public:
-	UItemBase();
+public:	
+	// Sets default values for this actor's properties
+	AItemBase();
 
 public:
-	virtual void Use(APlayerCharacter* OwningCharacter) PURE_VIRTUAL(UItemBase, );
+	virtual void Use(APlayerCharacter* OwningCharacter) PURE_VIRTUAL(AItemBase, );
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnUse(APlayerCharacter* OwningCharacter);
 
 protected:
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
-	FText UseActionText;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
-	FText ItemDisplayName;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item", meta = (MultiLine = true))
-	FText ItemDescriptionText;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
+	FText ItemName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	UStaticMesh* PickUpMesh;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	UTexture2D* ThumbnailImage;
 
 	UPROPERTY()
 	UInventoryComponent* OwningInventory;
-
 };
