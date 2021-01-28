@@ -3,7 +3,9 @@
 
 #include "MyCoopGame/Public/Items/ItemBase.h"
 
-UItemBase::UItemBase()
+// Sets default values
+AItemBase::AItemBase()
 {
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 
 }
