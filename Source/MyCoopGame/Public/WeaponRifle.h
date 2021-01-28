@@ -44,4 +44,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	UParticleSystem* TracerEffect;
 
+	UPROPERTY(EditDefaultsOnly, Category="Camera")
+	TSubclassOf< UCameraShake> FireCamShake;
 };

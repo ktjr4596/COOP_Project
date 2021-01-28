@@ -60,6 +60,18 @@ void AWeaponRifle::Use()
 void AWeaponRifle::PlayFireEffect()
 {
 	PlayMuzzleEffect();
+
+	APawn* MyOwner = Cast<APawn>( GetOwner());
+
+	if (nullptr != MyOwner)
+	{
+		APlayerController* PlayerController= Cast<APlayerController>( MyOwner->GetController());
+		if (nullptr != PlayerController)
+		{
+			PlayerController->ClientPlayCameraShake(FireCamShake);
+		}
+	}
+
 }
 
 void AWeaponRifle::PlayMuzzleEffect()

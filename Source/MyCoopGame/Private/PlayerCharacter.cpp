@@ -87,7 +87,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	
 			// 블락된 아이템 텍스트 띄우기
 			UKismetSystemLibrary::PrintString(GetWorld(), HitResult.Actor->GetName(), true, false, FLinearColor::Red, 0.0f);
-			TargetItem = HitResult.Actor.Get();
+			TargetItem = HitResult.Actor;
 			
 		}
 		else
@@ -105,7 +105,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FVector DistanceToTarget = PlayerLocation - TargetLocation;
 
 			// 블락된 아이템 텍스트 띄우기
-			TargetItem = HitResult.Actor.Get();
+			TargetItem = HitResult.Actor;
 
 		}
 		else
@@ -226,7 +226,8 @@ void APlayerCharacter::LootItem()
 {
 	if (nullptr != TargetItem)
 	{
-		if (true == TargetItem->GetClass()->IsChildOf(AWeaponBase::StaticClass()))
+		AActor* CurrentTarget = TargetItem.Get();
+		if (true == CurrentTarget->GetClass()->IsChildOf(AWeaponBase::StaticClass()))
 		{
 			if (nullptr != Weapon)
 			{
@@ -237,7 +238,7 @@ void APlayerCharacter::LootItem()
 			SpawnParams.Owner = this;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(TargetItem->GetClass(), GetActorTransform(), SpawnParams);
+			AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(CurrentTarget->GetClass(), GetActorTransform(), SpawnParams);
 			if (nullptr != NewWeapon)
 			{
 				Weapon = NewWeapon;

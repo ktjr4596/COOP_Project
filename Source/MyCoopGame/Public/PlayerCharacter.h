@@ -75,7 +75,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	bool bHasWeapon;
 
-	AActor* TargetItem;
+	TWeakObjectPtr<AActor> TargetItem;
 
 	
 
