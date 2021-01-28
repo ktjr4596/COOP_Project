@@ -30,6 +30,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual FVector GetPawnViewLocation() const override;
+
 protected:
 	// Movement
 	void MoveForward(float Value);
@@ -39,6 +41,17 @@ protected:
 	void EndCrouch();
 
 	void EquipWeapon();
+
+	void BeginZoom();
+	void EndZoom();
+
+	void LootItem();
+	
+
+protected:
+	void UseWeapon();
+	void UnUseWeapon();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -50,8 +63,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	AWeaponBase* Weapon;
 
+	float DefaultFOV;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Zoom")
+	float ZoomedFOV;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category="Zoom", meta=(ClampMin=0.1 , ClampMax=100.0))
+	float ZoomLerpSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category="Zoom")
+	bool bWantsToZoom;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	bool bHasWeapon;
+
+	TWeakObjectPtr<AActor> TargetItem;
 
 	
 
