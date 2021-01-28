@@ -11,6 +11,8 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "../MyCoopGame.h"
+#include "MyCoopGame/Public/Items/InventoryComponent.h"
+
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -39,6 +41,8 @@ APlayerCharacter::APlayerCharacter()
 	// character movement followed by camera's direction
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComp"));
 
 	TargetItem = nullptr;
 }

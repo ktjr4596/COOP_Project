@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class AWeaponBase;
+class UInventoryComponent;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -62,6 +63,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	AWeaponBase* Weapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+	UInventoryComponent* InventoryComp;
 
 	float DefaultFOV;
 

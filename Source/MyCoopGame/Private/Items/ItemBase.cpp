@@ -3,3 +3,7 @@
 
 #include "MyCoopGame/Public/Items/ItemBase.h"
 
+UItemBase::UItemBase()
+{
+
+}
