@@ -25,6 +25,8 @@ public:
 
 protected:
 	void PlayFireEffect();
+
+	void PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector& ImpactPoint, const FVector& ImpactNormal);
 	void PlayMuzzleEffect();
 	void PlayTraceEffect();
 
@@ -43,6 +45,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	UParticleSystem* TracerEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category="FleshFX")
+	UParticleSystem* FleshEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TSubclassOf< UCameraShake> FireCamShake;

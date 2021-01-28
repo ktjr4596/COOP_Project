@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "../MyCoopGame.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for weapons"), ECVF_Cheat);
@@ -31,18 +32,32 @@ void AWeaponRifle::Use()
 		FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*10000.0f);
 
 		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(this);
+		QueryParams.AddIgnoredActor(MyOwner);
 		QueryParams.bDebugQuery = true;
 		QueryParams.bTraceComplex = false;
+		QueryParams.bReturnPhysicalMaterial = true;
 
 		FHitResult HitResult;
-		if (true == GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, TraceEndPoint, ECollisionChannel::ECC_Visibility, QueryParams))
+		if (true == GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, TraceEndPoint, COLLISION_WEAPON, QueryParams))
 		{
 			AActor* HitActor= HitResult.GetActor();
 			
-			UGameplayStatics::ApplyPointDamage(HitActor, DamageBase, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), this, DamageType);
 			
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, HitResult.ImpactPoint,HitResult.ImpactNormal.Rotation(),true);
+			EPhysicalSurface HitSurfaceType= UPhysicalMaterial::DetermineSurfaceType( HitResult.PhysMaterial.Get());
+
+		
+			float ActualDamage = DamageBase;
+
+			if (SURFACETYPE_FLESHVLUNERABLE == HitSurfaceType)
+			{
+				ActualDamage *= 4.0f;
+			}
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), this, DamageType);
+
+
+			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint, HitResult.ImpactNormal);
+
+
 		}
 
 		PlayFireEffect();
@@ -74,6 +89,26 @@ void AWeaponRifle::PlayFireEffect()
 
 }
 
+
+void AWeaponRifle::PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector & ImpactPoint, const FVector & ImpactNormal)
+{
+	UParticleSystem* ImpactEffect = nullptr;
+	switch (SurfaceType)
+	{
+	case SURFACETYPE_FLESHDEFAULT:
+	case SURFACETYPE_FLESHVLUNERABLE:
+		ImpactEffect = FleshEffect;
+		break;
+	default:
+		ImpactEffect = MuzzleEffect;
+		break;
+	}
+	if (nullptr != ImpactEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, ImpactPoint, ImpactNormal.Rotation(), true);
+	}
+}
+
 void AWeaponRifle::PlayMuzzleEffect()
 {
 	if (nullptr != MuzzleEffect)
@@ -84,6 +119,7 @@ void AWeaponRifle::PlayMuzzleEffect()
 
 void AWeaponRifle::PlayTraceEffect()
 {
+
 }
 
 void AWeaponRifle::BeginPlay()

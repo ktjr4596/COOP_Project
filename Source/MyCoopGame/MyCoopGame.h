@@ -13,3 +13,8 @@ enum class EDebugDrawType : uint8
 	DebugDrawType_Weapon,
 	DebugDrawType_EyeTrace,
 };
+
+#define SURFACETYPE_FLESHDEFAULT			EPhysicalSurface::SurfaceType1
+#define SURFACETYPE_FLESHVLUNERABLE			EPhysicalSurface::SurfaceType2
+
+#define COLLISION_WEAPON			ECC_GameTraceChannel1
