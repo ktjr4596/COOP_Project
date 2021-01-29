@@ -6,11 +6,9 @@
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	Capacity = 20;
+
 }
 
 
@@ -23,12 +21,14 @@ void UInventoryComponent::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool UInventoryComponent::AddItem(AItemBase * item)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	return false;
 }
+
+bool UInventoryComponent::RemoveItem(AItemBase * item)
+{
+	return false;
+}
+
 

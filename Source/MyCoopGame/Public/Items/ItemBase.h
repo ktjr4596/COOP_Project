@@ -11,6 +11,14 @@ class UStaticMesh;
 class UTexture2D;
 class UInventoryComponent;
 
+UENUM()
+enum class EItemType
+{
+	ItemType_Cosumable,
+	ItemType_Equipable,
+
+};
+
 
 UCLASS(Abstract,BlueprintType,Blueprintable)
 class MYCOOPGAME_API AItemBase : public AActor
@@ -24,6 +32,8 @@ public:
 public:
 	virtual void Use(APlayerCharacter* OwningCharacter) PURE_VIRTUAL(AItemBase, );
 
+public:
+	EItemType GetItemType() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
@@ -35,6 +45,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	UTexture2D* ThumbnailImage;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	EItemType ItemType;
+
+UPROPERTY()
 	UInventoryComponent* OwningInventory;
+
 };

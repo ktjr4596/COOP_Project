@@ -6,6 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+
+
+class AItemBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYCOOPGAME_API UInventoryComponent : public UActorComponent
@@ -21,8 +25,24 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	bool AddItem(AItemBase* item);
+	bool RemoveItem(AItemBase* item);
 
-		
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
+	TArray<AItemBase*> ItemArray;
+
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FOnInventoryUpdated OnInventoryUpdated;
+
+	UPROPERTY( BlueprintReadOnly,Category="Inventory")
+	int32 CurrentItemCount;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
+	int32 Capacity;
+
+
+	
 };

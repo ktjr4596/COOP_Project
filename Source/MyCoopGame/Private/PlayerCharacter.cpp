@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "WeaponBase.h"
+#include "Weapon/WeaponClass.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -232,28 +232,34 @@ void APlayerCharacter::LootItem()
 	if (nullptr != TargetItem)
 	{
 		AActor* CurrentTarget = TargetItem.Get();
-		if (true == CurrentTarget->GetClass()->IsChildOf(AWeaponBase::StaticClass()))
+		if (true == CurrentTarget->GetClass()->IsChildOf(AItemBase::StaticClass()))
 		{
-			if (nullptr != Weapon)
+			AItemBase* CurrentItem = Cast<AItemBase>(CurrentTarget);
+			if (nullptr == CurrentItem)
 			{
-				GetWorld()->DestroyActor(Weapon);
-				Weapon = nullptr;
+				return;
 			}
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(CurrentTarget->GetClass(), GetActorTransform(), SpawnParams);
-			if (nullptr != NewWeapon)
-			{
-				Weapon = NewWeapon;
-				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
+		}//if (nullptr != Weapon)
+			//{
+			//	GetWorld()->DestroyActor(Weapon);
+			//	Weapon = nullptr;
+			//}
+			//FActorSpawnParameters SpawnParams;
+			//SpawnParams.Owner = this;
+			//SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+			//AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(CurrentTarget->GetClass(), GetActorTransform(), SpawnParams);
+			//if (nullptr != NewWeapon)
+			//{
+			//	Weapon = NewWeapon;
+			//	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
 
-				Weapon->SetActorEnableCollision(false);
-			}
-		}
+			//	Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+
+			//	Weapon->SetActorEnableCollision(false);
+			//}
+		
 	}
 }
 
@@ -261,7 +267,7 @@ void APlayerCharacter::UseWeapon()
 {
 	if (true==bHasWeapon&& nullptr != Weapon)
 	{
-		Weapon->Use();
+		Weapon->Use(this);
 	}
 }
 
@@ -269,7 +275,6 @@ void APlayerCharacter::UnUseWeapon()
 {
 	if (true == bHasWeapon && nullptr != Weapon)
 	{
-		Weapon->UnUse();
 	}
 }
 

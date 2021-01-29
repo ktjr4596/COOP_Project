@@ -8,7 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-class AWeaponBase;
+class AWeaponClass;
 class UInventoryComponent;
 
 UCLASS()
@@ -62,7 +62,7 @@ protected:
 	USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
-	AWeaponBase* Weapon;
+	AWeaponClass* Weapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
 	UInventoryComponent* InventoryComp;
