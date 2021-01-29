@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class AItemBase;
 class AWeaponClass;
 class UInventoryComponent;
 
@@ -32,7 +33,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual FVector GetPawnViewLocation() const override;
-
+	
+public: 
+	
+	void EquipWeapon(AItemBase* Item);
 protected:
 	// Movement
 	void MoveForward(float Value);
@@ -41,7 +45,6 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 
-	void EquipWeapon();
 
 	void BeginZoom();
 	void EndZoom();
@@ -53,6 +56,8 @@ protected:
 	void UseWeapon();
 	void UnUseWeapon();
 
+	UFUNCTION(BlueprintCallable, Category="Item")
+	void UseItem(AItemBase* Item);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

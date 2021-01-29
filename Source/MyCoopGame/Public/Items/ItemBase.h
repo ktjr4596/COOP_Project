@@ -7,7 +7,7 @@
 #include "ItemBase.generated.h"
 
 class APlayerCharacter;
-class UStaticMesh;
+class UStaticMeshComponent;
 class UTexture2D;
 class UInventoryComponent;
 
@@ -16,7 +16,14 @@ enum class EItemType
 {
 	ItemType_Cosumable,
 	ItemType_Equipable,
+};
 
+UENUM()
+enum class EItemState
+{
+	ItemState_Field,
+	ItemState_Inventory,
+	ItemState_Equip,
 };
 
 
@@ -30,17 +37,28 @@ public:
 	AItemBase();
 
 public:
-	virtual void Use(APlayerCharacter* OwningCharacter) PURE_VIRTUAL(AItemBase, );
+	virtual void Use(APlayerCharacter* OwningCharacter);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUse(APlayerCharacter* OwningCharacter);
 
 public:
 	EItemType GetItemType() const;
+public:
+	void SetOwningInventory(UInventoryComponent* TargetInventory);
+	void ResetOwningInvetory();
+public:
+	void ChangeState(EItemState NewState);
+protected:
+	void SetHiddenPickupMesh(bool isHideMesh);
 
+	virtual void OnChangeState();
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	FText ItemName;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
-	UStaticMesh* PickUpMesh;
+	UStaticMeshComponent * PickUpMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	UTexture2D* ThumbnailImage;
@@ -48,7 +66,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	EItemType ItemType;
 
-UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	EItemState ItemState;
+
+	UPROPERTY()
 	UInventoryComponent* OwningInventory;
 
 };

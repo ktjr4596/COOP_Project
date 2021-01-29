@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/WeaponClass.h"
+#include "Items/ItemBase.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -139,8 +140,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 
-	PlayerInputComponent->BindAction("EquipWeapon", EInputEvent::IE_Pressed, this, &APlayerCharacter::EquipWeapon);
-
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Released, this, &APlayerCharacter::EndZoom);
 
@@ -192,30 +191,69 @@ void APlayerCharacter::EndCrouch()
 	UnCrouch();
 }
 
-void APlayerCharacter::EquipWeapon()
+void APlayerCharacter::EquipWeapon(AItemBase* Item)
 {
-	if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
+	if (nullptr == Item)
 	{
 		return;
 	}
 
-	bHasWeapon = !bHasWeapon;
-	if (true == bHasWeapon)
+	EItemType ItemType = Item->GetItemType();
+	
+	if (EItemType::ItemType_Equipable != ItemType)
 	{
-		bUseControllerRotationYaw = true;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
+		return;
+	}
 
-	}
-	else
+	AWeaponClass* TargetWeapon= Cast<AWeaponClass>(Item);
+	if (nullptr != TargetWeapon)
 	{
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;
+		if (nullptr != Weapon)
+		{
+			Weapon->SetOwner(nullptr);
+			InventoryComp->AddItem(Weapon);
+		}
+
+		Weapon = TargetWeapon;
+		Weapon->SetOwner(this);
+
+		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
+
+		Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+
+		Weapon->SetActorEnableCollision(false);
+		UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, false, FLinearColor::Green, 2.0f);
 	}
-	if (nullptr != Weapon)
-	{
-		Weapon->SetActorHiddenInGame(!bHasWeapon);
-	}
+
+	bHasWeapon = true;
+
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	InventoryComp->RemoveItem(Item);
+	//if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
+	//{
+	//	return;
+	//}
+
+	//bHasWeapon = !bHasWeapon;
+	//if (true == bHasWeapon)
+	//{
+	//	bUseControllerRotationYaw = true;
+	//	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	//}
+	//else
+	//{
+	//	bUseControllerRotationYaw = false;
+	//	GetCharacterMovement()->bOrientRotationToMovement = true;
+	//}
+	//if (nullptr != Weapon)
+	//{
+	//	Weapon->SetActorHiddenInGame(!bHasWeapon);
+	//}
 }
+
 
 void APlayerCharacter::BeginZoom()
 {
@@ -234,11 +272,14 @@ void APlayerCharacter::LootItem()
 		AActor* CurrentTarget = TargetItem.Get();
 		if (true == CurrentTarget->GetClass()->IsChildOf(AItemBase::StaticClass()))
 		{
+
 			AItemBase* CurrentItem = Cast<AItemBase>(CurrentTarget);
 			if (nullptr == CurrentItem)
 			{
 				return;
 			}
+			InventoryComp->AddItem(CurrentItem);
+
 
 		}//if (nullptr != Weapon)
 			//{
@@ -267,14 +308,29 @@ void APlayerCharacter::UseWeapon()
 {
 	if (true==bHasWeapon&& nullptr != Weapon)
 	{
-		Weapon->Use(this);
+		Weapon->Start();
 	}
+
 }
 
 void APlayerCharacter::UnUseWeapon()
 {
 	if (true == bHasWeapon && nullptr != Weapon)
 	{
+		Weapon->Stop();
 	}
+}
+
+void APlayerCharacter::UseItem(AItemBase * Item)
+{
+	if (nullptr == Item)
+	{
+		return;
+	}
+
+	Item->Use(this);
+	Item->OnUse(this);
+
+
 }
 

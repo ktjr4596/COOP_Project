@@ -26,8 +26,10 @@ protected:
 
 public:	
 	
-	bool AddItem(AItemBase* item);
-	bool RemoveItem(AItemBase* item);
+	bool AddItem(AItemBase* Item);
+	bool RemoveItem(AItemBase* Item);
+
+	int32 GetSize() const;
 
 protected:
 
