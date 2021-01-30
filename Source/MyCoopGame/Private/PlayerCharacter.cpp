@@ -62,6 +62,12 @@ void APlayerCharacter::BeginPlay()
 	{
 		DefaultFOV = CameraComp->FieldOfView;
 	}
+
+	// Bind onhealthchange function to UHealthComponent
+	if (nullptr != HealthComp)
+	{
+		HealthComp->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
+	}
 }
 
 // Called every frame
@@ -113,7 +119,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FVector PlayerLocation = GetActorLocation();
 			FVector TargetLocation = HitResult.Actor->GetActorLocation();
 			FVector DistanceToTarget = PlayerLocation - TargetLocation;
-
+			
 			// 블락된 아이템 텍스트 띄우기
 			TargetItem = HitResult.Actor;
 
@@ -165,10 +171,23 @@ FVector APlayerCharacter::GetPawnViewLocation() const
 	return Super::GetPawnViewLocation();
 }
 
+void APlayerCharacter::OnHealthChanged(UHealthComponent * TargetHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
+{
+	if (Health <= 0.0f && false == bIsDied)
+	{
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(10.0f);
+
+		bIsDied = true;
+	}
+}
+
 void APlayerCharacter::MoveForward(float Value)
 {
 	FVector MoveDirection;
-	if (true == bHasWeapon)
+	if (true == bHasWeapon || true==bCameraRotating)
 	{
 		MoveDirection = GetActorForwardVector();
 	}
@@ -183,7 +202,16 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	AddMovementInput(CameraComp->GetRightVector()*Value);
+	FVector MoveDirection;
+	if (true == bCameraRotating)
+	{
+		MoveDirection = GetActorRightVector();
+	}
+	else
+	{
+		MoveDirection=CameraComp->GetRightVector();
+	}
+	AddMovementInput(MoveDirection*Value);
 }
 
 void APlayerCharacter::BeginCrouch()

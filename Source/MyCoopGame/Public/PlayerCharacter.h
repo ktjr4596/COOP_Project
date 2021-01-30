@@ -36,23 +36,23 @@ public:
 	virtual FVector GetPawnViewLocation() const override;
 	
 public: 
-	
 	void EquipWeapon(AItemBase* Item);
+
+	// Call if player health is changed
+	UFUNCTION()
+	void OnHealthChanged(class UHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
 protected:
-	// Movement
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
 	void BeginCrouch();
 	void EndCrouch();
 
-
 	void BeginZoom();
 	void EndZoom();
 
 	void LootItem();
-	
-
 protected:
 	void UseWeapon();
 	void UnUseWeapon();
@@ -73,7 +73,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
 	UInventoryComponent* InventoryComp;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Health")
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Health")
 	UHealthComponent* HealthComp;
 
 	float DefaultFOV;
@@ -89,6 +89,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	bool bHasWeapon;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category="Camera")
+	bool bCameraRotating;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Player")
+	bool bIsDied;
 
 	TWeakObjectPtr<AActor> TargetItem;
 
