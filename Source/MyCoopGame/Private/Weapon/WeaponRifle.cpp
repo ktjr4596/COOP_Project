@@ -19,17 +19,16 @@ AWeaponRifle::AWeaponRifle()
 {
 }
 
-void AWeaponRifle::Use(APlayerCharacter* OwningCharacter)
+void AWeaponRifle::Start()
 {
-	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds,0.0f);
-
+	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
 	GetWorldTimerManager().SetTimer(TimerHandle_Firing, this, &AWeaponRifle::Fire, TimeBetweenShots, true, FirstDelay);
 }
 
-//void AWeaponRifle::UnUse()
-//{
-//	StopFire();
-//}
+void AWeaponRifle::Stop()
+{
+	StopFire();
+}
 
 void AWeaponRifle::Fire()
 {
