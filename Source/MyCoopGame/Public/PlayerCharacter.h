@@ -8,7 +8,9 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-class AWeaponBase;
+class AItemBase;
+class AWeaponClass;
+class UInventoryComponent;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -30,6 +32,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual FVector GetPawnViewLocation() const override;
+	
+public: 
+	
+	void EquipWeapon(AItemBase* Item);
 protected:
 	// Movement
 	void MoveForward(float Value);
@@ -38,7 +45,19 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 
-	void EquipWeapon();
+
+	void BeginZoom();
+	void EndZoom();
+
+	void LootItem();
+	
+
+protected:
+	void UseWeapon();
+	void UnUseWeapon();
+
+	UFUNCTION(BlueprintCallable, Category="Item")
+	void UseItem(AItemBase* Item);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -48,10 +67,26 @@ protected:
 	USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
-	AWeaponBase* Weapon;
+	AWeaponClass* Weapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+	UInventoryComponent* InventoryComp;
+
+	float DefaultFOV;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Zoom")
+	float ZoomedFOV;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category="Zoom", meta=(ClampMin=0.1 , ClampMax=100.0))
+	float ZoomLerpSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category="Zoom")
+	bool bWantsToZoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	bool bHasWeapon;
+
+	TWeakObjectPtr<AActor> TargetItem;
 
 	
 
