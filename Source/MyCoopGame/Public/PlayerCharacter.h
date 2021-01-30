@@ -11,6 +11,7 @@ class USpringArmComponent;
 class AItemBase;
 class AWeaponClass;
 class UInventoryComponent;
+class UHealthComponent;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -71,6 +72,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
 	UInventoryComponent* InventoryComp;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Health")
+	UHealthComponent* HealthComp;
 
 	float DefaultFOV;
 

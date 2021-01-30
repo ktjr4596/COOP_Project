@@ -13,7 +13,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "../MyCoopGame.h"
 #include "MyCoopGame/Public/Items/InventoryComponent.h"
-
+#include "Components/HealthComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -44,6 +45,10 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComp"));
+
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
 
 	TargetItem = nullptr;
 }
