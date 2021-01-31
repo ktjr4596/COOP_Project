@@ -53,6 +53,10 @@ protected:
 	void EndZoom();
 
 	void LootItem();
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void ServerLootItem();
+
 protected:
 	void UseWeapon();
 	void UnUseWeapon();
@@ -67,10 +71,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category="Weapon")
 	AWeaponClass* Weapon;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Replicated,  Category="Inventory")
 	UInventoryComponent* InventoryComp;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Health")
@@ -87,7 +91,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Zoom")
 	bool bWantsToZoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Replicated,  Category="Weapon")
 	bool bHasWeapon;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category="Camera")
@@ -96,6 +100,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Player")
 	bool bIsDied;
 
+	UPROPERTY(Replicated)
 	TWeakObjectPtr<AActor> TargetItem;
 
 	

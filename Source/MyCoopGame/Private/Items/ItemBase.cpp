@@ -3,12 +3,15 @@
 
 #include "Items/ItemBase.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AItemBase::AItemBase()
 {
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickUpMesh"));
 	RootComponent = PickUpMesh;
+
+	SetReplicates(true);
 
 }
 
@@ -52,4 +55,13 @@ void AItemBase::SetHiddenPickupMesh(bool isHideMesh)
 
 void AItemBase::OnChangeState()
 {
+}
+
+
+// Relicated로 선언된 변수들을 엔진 쪽에서 인식할 수 있는 방법
+void AItemBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AItemBase, ItemState);
 }

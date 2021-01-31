@@ -15,6 +15,7 @@
 #include "MyCoopGame/Public/Items/InventoryComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -231,39 +232,41 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 		return;
 	}
 
-	EItemType ItemType = Item->GetItemType();
-	
-	if (EItemType::ItemType_Equipable != ItemType)
-	{
-		return;
-	}
 
-	AWeaponClass* TargetWeapon= Cast<AWeaponClass>(Item);
-	if (nullptr != TargetWeapon)
-	{
-		if (nullptr != Weapon)
+		EItemType ItemType = Item->GetItemType();
+
+		if (EItemType::ItemType_Equipable != ItemType)
 		{
-			Weapon->SetOwner(nullptr);
-			InventoryComp->AddItem(Weapon);
+			return;
 		}
 
-		Weapon = TargetWeapon;
-		Weapon->SetOwner(this);
+		AWeaponClass* TargetWeapon = Cast<AWeaponClass>(Item);
+		if (nullptr != TargetWeapon)
+		{
+			if (nullptr != Weapon)
+			{
+				Weapon->SetOwner(nullptr);
+				InventoryComp->AddItem(Weapon);
+			}
 
-		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
+			Weapon = TargetWeapon;
+			Weapon->SetOwner(this);
 
-		Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
 
-		Weapon->SetActorEnableCollision(false);
-		UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, false, FLinearColor::Green, 2.0f);
-	}
+			Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
 
-	bHasWeapon = true;
+			Weapon->SetActorEnableCollision(false);
+			UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, false, FLinearColor::Green, 2.0f);
+		}
 
-	bUseControllerRotationYaw = true;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
+		bHasWeapon = true;
 
-	InventoryComp->RemoveItem(Item);
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+
+		InventoryComp->RemoveItem(Item);
+	
 	//if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
 	//{
 	//	return;
@@ -300,6 +303,11 @@ void APlayerCharacter::EndZoom()
 
 void APlayerCharacter::LootItem()
 {
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerLootItem();
+		return;
+	}
 	if (nullptr != TargetItem)
 	{
 		AActor* CurrentTarget = TargetItem.Get();
@@ -314,27 +322,20 @@ void APlayerCharacter::LootItem()
 			InventoryComp->AddItem(CurrentItem);
 
 
-		}//if (nullptr != Weapon)
-			//{
-			//	GetWorld()->DestroyActor(Weapon);
-			//	Weapon = nullptr;
-			//}
-			//FActorSpawnParameters SpawnParams;
-			//SpawnParams.Owner = this;
-			//SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-			//AWeaponBase* NewWeapon = GetWorld()->SpawnActor<AWeaponBase>(CurrentTarget->GetClass(), GetActorTransform(), SpawnParams);
-			//if (nullptr != NewWeapon)
-			//{
-			//	Weapon = NewWeapon;
-			//	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
-
-			//	Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
-
-			//	Weapon->SetActorEnableCollision(false);
-			//}
+		}
 		
 	}
+}
+
+void APlayerCharacter::ServerLootItem_Implementation()
+{
+	LootItem();
+}
+
+
+bool APlayerCharacter::ServerLootItem_Validate()
+{
+	return true;
 }
 
 void APlayerCharacter::UseWeapon()
@@ -363,7 +364,17 @@ void APlayerCharacter::UseItem(AItemBase * Item)
 
 	Item->Use(this);
 	Item->OnUse(this);
-
-
 }
 
+
+
+// Relicated로 선언된 변수들을 엔진 쪽에서 인식할 수 있는 방법
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, Weapon);
+	DOREPLIFETIME(APlayerCharacter, bHasWeapon);
+	DOREPLIFETIME(APlayerCharacter, TargetItem);
+	DOREPLIFETIME(APlayerCharacter, InventoryComp);
+}
