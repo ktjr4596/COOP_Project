@@ -9,6 +9,22 @@
 
 class UParticleSystem;
 
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	FVector_NetQuantize HitImpactPoint;
+
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> HitSurfaceType;
+
+	UPROPERTY()
+	int8 Seed = 0;
+};
+
+
 /**
  * 
  */
@@ -28,11 +44,16 @@ protected:
 
 	void StopFire();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
 protected:
 	void PlayFireEffect();
-	void PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector& ImpactPoint, const FVector& ImpactNormal);
+	void PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector& ImpactPoint);
 	void PlayMuzzleEffect();
-	void PlayTraceEffect();
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 protected:
 	// Called when the game starts or when spawned
@@ -42,6 +63,9 @@ protected:
 protected:
 
 	FTimerHandle TimerHandle_Firing;
+
+	UPROPERTY(ReplicatedUsing= OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;

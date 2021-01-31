@@ -38,6 +38,9 @@ public:
 public: 
 	void EquipWeapon(AItemBase* Item);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerEquipWeapon(AItemBase* Item);
+
 	// Call if player health is changed
 	UFUNCTION()
 	void OnHealthChanged(class UHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

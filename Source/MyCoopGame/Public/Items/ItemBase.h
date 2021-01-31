@@ -51,8 +51,12 @@ public:
 	void ChangeState(EItemState NewState);
 protected:
 	void SetHiddenPickupMesh(bool isHideMesh);
-
+	
 	virtual void OnChangeState();
+
+	UFUNCTION()
+	void OnRep_ChangeState();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	FText ItemName;
@@ -66,7 +70,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	EItemType ItemType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Item")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing=OnRep_ChangeState, Category = "Item")
 	EItemState ItemState;
 
 	UPROPERTY()

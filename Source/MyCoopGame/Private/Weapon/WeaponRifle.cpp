@@ -10,6 +10,7 @@
 #include "../MyCoopGame.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for weapons"), ECVF_Cheat);
@@ -17,6 +18,9 @@ FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugW
 AWeaponRifle::AWeaponRifle()
 	:AWeaponClass()
 {
+
+	NetUpdateFrequency = 66.0f;
+	MinNetUpdateFrequency = 32.0f;
 }
 
 void AWeaponRifle::Start()
@@ -32,6 +36,11 @@ void AWeaponRifle::Stop()
 
 void AWeaponRifle::Fire()
 {
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerFire();
+	}
+
 	AActor* MyOwner = GetOwner();
 	if (nullptr != MyOwner)
 	{
@@ -48,14 +57,14 @@ void AWeaponRifle::Fire()
 		QueryParams.bTraceComplex = false;
 		QueryParams.bReturnPhysicalMaterial = true;
 
+		EPhysicalSurface HitSurfaceType = SurfaceType_Default;
 		FHitResult HitResult;
+
 		if (true == GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, TraceEndPoint, COLLISION_WEAPON, QueryParams))
 		{
 			AActor* HitActor = HitResult.GetActor();
 
-
-			EPhysicalSurface HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
-
+			HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 
 			float ActualDamage = DamageBase;
 
@@ -66,12 +75,19 @@ void AWeaponRifle::Fire()
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), this, DamageType);
 
 
-			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint, HitResult.ImpactNormal);
+			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint);
 
-
+			TraceEndPoint = HitResult.ImpactPoint;
 		}
 
 		PlayFireEffect();
+
+		if (ROLE_Authority == GetLocalRole())
+		{
+			HitScanTrace.HitSurfaceType = HitSurfaceType;
+			HitScanTrace.HitImpactPoint = TraceEndPoint;
+			++HitScanTrace.Seed;
+		}
 
 		if (static_cast<int32>(EDebugDrawType::DebugDrawType_Weapon) == DebugDrawType)
 		{
@@ -81,6 +97,16 @@ void AWeaponRifle::Fire()
 		LastFireTime = GetWorld()->TimeSeconds;
 
 	}
+}
+
+void AWeaponRifle::ServerFire_Implementation()
+{
+	Fire();
+}
+
+bool AWeaponRifle::ServerFire_Validate()
+{
+	return true;
 }
 
 void AWeaponRifle::StopFire()
@@ -106,7 +132,7 @@ void AWeaponRifle::PlayFireEffect()
 }
 
 
-void AWeaponRifle::PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector & ImpactPoint, const FVector & ImpactNormal)
+void AWeaponRifle::PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector & ImpactPoint)
 {
 	UParticleSystem* ImpactEffect = nullptr;
 	switch (SurfaceType)
@@ -121,7 +147,13 @@ void AWeaponRifle::PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector 
 	}
 	if (nullptr != ImpactEffect)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, ImpactPoint, ImpactNormal.Rotation(), true);
+
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+
+		FVector ShotDirection = ImpactPoint - MuzzleLocation;
+		ShotDirection.Normalize();
+
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, ImpactPoint, ShotDirection.Rotation());
 	}
 }
 
@@ -133,9 +165,11 @@ void AWeaponRifle::PlayMuzzleEffect()
 	}
 }
 
-void AWeaponRifle::PlayTraceEffect()
-{
 
+void AWeaponRifle::OnRep_HitScanTrace()
+{
+	PlayMuzzleEffect();
+	PlayImpactEffect(HitScanTrace.HitSurfaceType, HitScanTrace.HitImpactPoint);
 }
 
 void AWeaponRifle::BeginPlay()
@@ -144,4 +178,13 @@ void AWeaponRifle::BeginPlay()
 
 	TimeBetweenShots = 60.0f / RateOfFire;
 
+}
+
+
+// Relicated로 선언된 변수들을 엔진 쪽에서 인식할 수 있는 방법
+void AWeaponRifle::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(AWeaponRifle, HitScanTrace, COND_SkipOwner);
 }

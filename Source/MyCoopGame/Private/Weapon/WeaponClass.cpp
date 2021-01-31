@@ -15,6 +15,7 @@ AWeaponClass::AWeaponClass()
 
 void AWeaponClass::Use(APlayerCharacter * OwningCharacter)
 {
+
 	if (nullptr == OwningCharacter)
 	{
 		return;
