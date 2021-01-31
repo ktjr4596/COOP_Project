@@ -11,6 +11,7 @@ class USpringArmComponent;
 class AItemBase;
 class AWeaponClass;
 class UInventoryComponent;
+class UHealthComponent;
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter
@@ -35,22 +36,26 @@ public:
 	virtual FVector GetPawnViewLocation() const override;
 	
 public: 
-	
 	void EquipWeapon(AItemBase* Item);
+
+	// Call if player health is changed
+	UFUNCTION()
+	void OnHealthChanged(class UHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
 protected:
-	// Movement
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
 	void BeginCrouch();
 	void EndCrouch();
 
-
 	void BeginZoom();
 	void EndZoom();
 
 	void LootItem();
-	
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void ServerLootItem();
 
 protected:
 	void UseWeapon();
@@ -66,11 +71,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category="Weapon")
 	AWeaponClass* Weapon;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Replicated,  Category="Inventory")
 	UInventoryComponent* InventoryComp;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Health")
+	UHealthComponent* HealthComp;
 
 	float DefaultFOV;
 
@@ -83,9 +91,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Zoom")
 	bool bWantsToZoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Replicated,  Category="Weapon")
 	bool bHasWeapon;
 
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category="Camera")
+	bool bCameraRotating;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Player")
+	bool bIsDied;
+
+	UPROPERTY(Replicated)
 	TWeakObjectPtr<AActor> TargetItem;
 
 	
