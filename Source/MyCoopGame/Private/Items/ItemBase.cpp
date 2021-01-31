@@ -57,11 +57,16 @@ void AItemBase::OnChangeState()
 {
 }
 
+void AItemBase::OnRep_ChangeState()
+{
+	OnChangeState();
+}
+
 
 // Relicated로 선언된 변수들을 엔진 쪽에서 인식할 수 있는 방법
 void AItemBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AItemBase, ItemState);
+	DOREPLIFETIME_CONDITION(AItemBase, ItemState,COND_SkipOwner);
 }

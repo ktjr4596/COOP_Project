@@ -227,6 +227,11 @@ void APlayerCharacter::EndCrouch()
 
 void APlayerCharacter::EquipWeapon(AItemBase* Item)
 {
+
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerEquipWeapon(Item);
+	}
 	if (nullptr == Item)
 	{
 		return;
@@ -257,7 +262,7 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 			Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
 
 			Weapon->SetActorEnableCollision(false);
-			UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, false, FLinearColor::Green, 2.0f);
+			UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, true, FLinearColor::Green, 5.0f);
 		}
 
 		bHasWeapon = true;
@@ -266,7 +271,7 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 
 		InventoryComp->RemoveItem(Item);
-	
+		Weapon->ChangeState(EItemState::ItemState_Equip);
 	//if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
 	//{
 	//	return;
@@ -291,6 +296,16 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 }
 
 
+void APlayerCharacter::ServerEquipWeapon_Implementation(AItemBase* Item)
+{
+	EquipWeapon(Item);
+}
+
+bool APlayerCharacter::ServerEquipWeapon_Validate(AItemBase* Item)
+{
+	return true;
+}
+
 void APlayerCharacter::BeginZoom()
 {
 	bWantsToZoom = true;
@@ -306,7 +321,6 @@ void APlayerCharacter::LootItem()
 	if (GetLocalRole() < ROLE_Authority)
 	{
 		ServerLootItem();
-		return;
 	}
 	if (nullptr != TargetItem)
 	{

@@ -30,6 +30,7 @@ public:
 	AWeaponClass();
 public:
 	virtual void Use(APlayerCharacter* OwningCharacter) override;
+
 public:
 	virtual void Start();
 	virtual void Stop();
