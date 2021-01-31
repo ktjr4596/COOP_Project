@@ -30,7 +30,6 @@ protected:
 
 protected:
 	void PlayFireEffect();
-
 	void PlayImpactEffect(EPhysicalSurface SurfaceType, const FVector& ImpactPoint, const FVector& ImpactNormal);
 	void PlayMuzzleEffect();
 	void PlayTraceEffect();

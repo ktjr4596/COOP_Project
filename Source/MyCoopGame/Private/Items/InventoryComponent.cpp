@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "MyCoopGame/Public/Items/InventoryComponent.h"
+#include "Items/InventoryComponent.h"
 #include "Items/ItemBase.h"
 
 // Sets default values for this component's properties
@@ -10,6 +10,7 @@ UInventoryComponent::UInventoryComponent()
 
 	Capacity = 20;
 
+	SetIsReplicated(true);
 }
 
 
