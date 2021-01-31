@@ -21,8 +21,8 @@ public:
 	AWeaponRifle();
 
 public:
-	virtual void Use(APlayerCharacter* OwningCharacter) override final;
-
+	virtual void Start() override;
+	virtual void Stop() override;
 protected:
 	void Fire();
 

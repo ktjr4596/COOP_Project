@@ -28,10 +28,16 @@ class MYCOOPGAME_API AWeaponClass : public AItemBase
 	GENERATED_BODY()
 public:
 	AWeaponClass();
-
+public:
+	virtual void Use(APlayerCharacter* OwningCharacter) override;
+public:
+	virtual void Start();
+	virtual void Stop();
 public:
 	EWeaponType GetWeaponType() const;
 
+protected:
+	virtual void OnChangeState() override;
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
