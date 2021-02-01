@@ -22,7 +22,6 @@ void AWeaponClass::Use(APlayerCharacter * OwningCharacter)
 	}
 
 	OwningCharacter->EquipWeapon(this);
-	ChangeState(EItemState::ItemState_Equip);
 }
 
 void AWeaponClass::Start()

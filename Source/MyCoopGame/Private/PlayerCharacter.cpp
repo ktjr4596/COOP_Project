@@ -64,11 +64,13 @@ void APlayerCharacter::BeginPlay()
 		DefaultFOV = CameraComp->FieldOfView;
 	}
 
+
 	// Bind onhealthchange function to UHealthComponent
 	if (nullptr != HealthComp)
 	{
 		HealthComp->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
 	}
+
 }
 
 // Called every frame
@@ -238,61 +240,40 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 	}
 
 
-		EItemType ItemType = Item->GetItemType();
+	EItemType ItemType = Item->GetItemType();
 
-		if (EItemType::ItemType_Equipable != ItemType)
+	if (EItemType::ItemType_Equipable != ItemType)
+	{
+		return;
+	}
+
+	AWeaponClass* TargetWeapon = Cast<AWeaponClass>(Item);
+	if (nullptr != TargetWeapon)
+	{
+		if (nullptr != Weapon)
 		{
-			return;
+			Weapon->SetOwner(nullptr);
+			InventoryComp->AddItem(Weapon);
 		}
 
-		AWeaponClass* TargetWeapon = Cast<AWeaponClass>(Item);
-		if (nullptr != TargetWeapon)
-		{
-			if (nullptr != Weapon)
-			{
-				Weapon->SetOwner(nullptr);
-				InventoryComp->AddItem(Weapon);
-			}
+		Weapon = TargetWeapon;
+		Weapon->SetOwner(this);
 
-			Weapon = TargetWeapon;
-			Weapon->SetOwner(this);
+		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
 
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
+		Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
 
-			Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
+		Weapon->SetActorEnableCollision(false);
+		UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, true, FLinearColor::Green, 5.0f);
+	}
 
-			Weapon->SetActorEnableCollision(false);
-			UKismetSystemLibrary::PrintString(GetWorld(), Weapon->GetName(), true, true, FLinearColor::Green, 5.0f);
-		}
+	bHasWeapon = true;
 
-		bHasWeapon = true;
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 
-		bUseControllerRotationYaw = true;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-
-		InventoryComp->RemoveItem(Item);
-		Weapon->ChangeState(EItemState::ItemState_Equip);
-	//if (true == bWasJumping || true==GetMovementComponent()->IsFalling())
-	//{
-	//	return;
-	//}
-
-	//bHasWeapon = !bHasWeapon;
-	//if (true == bHasWeapon)
-	//{
-	//	bUseControllerRotationYaw = true;
-	//	GetCharacterMovement()->bOrientRotationToMovement = false;
-
-	//}
-	//else
-	//{
-	//	bUseControllerRotationYaw = false;
-	//	GetCharacterMovement()->bOrientRotationToMovement = true;
-	//}
-	//if (nullptr != Weapon)
-	//{
-	//	Weapon->SetActorHiddenInGame(!bHasWeapon);
-	//}
+	InventoryComp->RemoveItem(Item);
+	Weapon->ChangeState(EItemState::ItemState_Equip);
 }
 
 

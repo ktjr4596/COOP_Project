@@ -43,7 +43,7 @@ void AItemBase::ChangeState(EItemState NewState)
 	{
 		ItemState = NewState;
 
-		OnChangeState();
+		OnRep_ChangeState();
 	}
 }
 
@@ -68,5 +68,5 @@ void AItemBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION(AItemBase, ItemState,COND_SkipOwner);
+	DOREPLIFETIME(AItemBase, ItemState);
 }
