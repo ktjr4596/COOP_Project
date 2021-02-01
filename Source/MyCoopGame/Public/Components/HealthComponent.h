@@ -31,7 +31,7 @@ public:
 protected:
 
 
-	UPROPERTY(BlueprintReadOnly, Category="Health")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="Health")
 	float CurrentHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Health")

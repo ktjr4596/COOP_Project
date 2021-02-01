@@ -2,12 +2,13 @@
 
 
 #include "Components/HealthComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
 {
-
 	DefaultHealth = 100.0f;
+	SetIsReplicated(true);
 }
 
 
@@ -18,10 +19,9 @@ void UHealthComponent::BeginPlay()
 
 	// ...
 
-	AActor* MyOwner= GetOwner();
-	if (nullptr != MyOwner)
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		MyOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::HandleTakeAnyDamage);
+		GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::HandleTakeAnyDamage);
 	}
 
 	CurrentHealth = DefaultHealth;
@@ -39,4 +39,13 @@ void UHealthComponent::HandleTakeAnyDamage(AActor * DamagedActor, float Damage, 
 
 	OnHealthChanged.Broadcast(this,CurrentHealth,Damage,DamageType,InstigatedBy,DamageCauser);
 	UE_LOG(LogTemp, Log, TEXT("Health is %f"), CurrentHealth);
+}
+
+
+// Relicated로 선언된 변수들을 엔진 쪽에서 인식할 수 있는 방법
+void UHealthComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthComponent, CurrentHealth);
 }

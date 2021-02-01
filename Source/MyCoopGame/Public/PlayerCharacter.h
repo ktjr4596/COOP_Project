@@ -77,7 +77,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category="Weapon")
 	AWeaponClass* Weapon;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Replicated,  Category="Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Category="Inventory")
 	UInventoryComponent* InventoryComp;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Health")
@@ -100,7 +100,7 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category="Camera")
 	bool bCameraRotating;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Player")
 	bool bIsDied;
 
 	UPROPERTY(Replicated)
