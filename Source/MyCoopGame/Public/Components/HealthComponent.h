@@ -25,13 +25,19 @@ protected:
 	UFUNCTION()
 	void HandleTakeAnyDamage( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+protected:
+
+	UFUNCTION()
+	void OnRep_HealthChanged(float OldHealth);
+
 public:
+
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnHealthChangedSignature OnHealthChanged;
 protected:
 
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category="Health")
+	UPROPERTY(Replicated, BlueprintReadOnly,ReplicatedUsing=OnRep_HealthChanged ,Category="Health")
 	float CurrentHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Health")

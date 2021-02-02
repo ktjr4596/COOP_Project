@@ -3,6 +3,7 @@
 
 #include "Components/HealthComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "..\..\Public\Components\HealthComponent.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -38,7 +39,13 @@ void UHealthComponent::HandleTakeAnyDamage(AActor * DamagedActor, float Damage, 
 	CurrentHealth= FMath::Clamp((CurrentHealth - Damage), 0.0f, DefaultHealth);
 
 	OnHealthChanged.Broadcast(this,CurrentHealth,Damage,DamageType,InstigatedBy,DamageCauser);
-	UE_LOG(LogTemp, Log, TEXT("Health is %f"), CurrentHealth);
+}
+
+void UHealthComponent::OnRep_HealthChanged(float OldHealth)
+{
+	float DeltaHealth = CurrentHealth - OldHealth;
+
+	OnHealthChanged.Broadcast(this,CurrentHealth,DeltaHealth, nullptr,nullptr,nullptr);
 }
 
 
