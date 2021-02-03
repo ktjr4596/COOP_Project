@@ -32,6 +32,7 @@ public:
 protected:
 	void SelfDestruct();
 
+	UFUNCTION()
 	void HandleTakeDamage(class UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 protected:

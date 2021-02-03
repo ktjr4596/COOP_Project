@@ -10,7 +10,7 @@ UInventoryComponent::UInventoryComponent()
 
 	Capacity = 20;
 
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 }
 
 

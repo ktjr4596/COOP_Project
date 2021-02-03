@@ -23,6 +23,8 @@ ATestAI::ATestAI()
 	RootComponent = MeshComp;
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
 
+	SetReplicates(true);
+
 }
 
 // Called when the game starts or when spawned
@@ -30,10 +32,11 @@ void ATestAI::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	NextPathPoint= GetNextFindPath();
+
 	
 	if (GetLocalRole() == ROLE_Authority)
 	{
+		NextPathPoint = GetNextFindPath();
 		if (nullptr != HealthComp)
 		{
 			HealthComp->OnHealthChanged.AddDynamic(this, &ATestAI::HandleTakeDamage);
@@ -54,7 +57,7 @@ void ATestAI::Tick(float DeltaTime)
 			FVector ForceDirection = NextPathPoint - GetActorLocation();
 			ForceDirection.Normalize();
 
-			MeshComp->AddForce(ForceDirection*MovmentSpeed, NAME_None, bUseVelocityChange);
+			MeshComp->AddForce(ForceDirection*1000.0f, NAME_None, bUseVelocityChange);
 
 			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
 
@@ -70,20 +73,21 @@ void ATestAI::Tick(float DeltaTime)
 
 FVector ATestAI::GetNextFindPath()
 {
-
-	ACharacter* PlayerPawn= UGameplayStatics::GetPlayerCharacter(this, 0);
-	if (nullptr != PlayerPawn)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		UNavigationPath* NavPath= UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
-		if (nullptr != NavPath)
+		ACharacter* PlayerPawn = UGameplayStatics::GetPlayerCharacter(this, 0);
+		if (nullptr != PlayerPawn)
 		{
-			if (NavPath->PathPoints.Num() > 1)
+			UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
+			if (nullptr != NavPath)
 			{
-				return NavPath->PathPoints[1];
+				if (NavPath->PathPoints.Num() > 1)
+				{
+					return NavPath->PathPoints[1];
+				}
 			}
 		}
 	}
-
 	return GetActorLocation();
 }
 
