@@ -7,6 +7,8 @@
 #include "WeaponRifle.generated.h"
 
 
+
+
 class UParticleSystem;
 
 USTRUCT()
@@ -92,4 +94,10 @@ protected:
 	float LastFireTime;
 
 	float TimeBetweenShots;
+
+	UPROPERTY(BlueprintReadOnly, Category="Ammo")
+	int32 CurrentAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
+	int32 DefaultAmmo;
 };

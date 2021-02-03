@@ -274,6 +274,8 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 
 	InventoryComp->RemoveItem(Item);
 	Weapon->ChangeState(EItemState::ItemState_Equip);
+
+	OnWeaponChange.Broadcast(this,Weapon);
 }
 
 
