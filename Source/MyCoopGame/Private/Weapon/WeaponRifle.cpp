@@ -35,6 +35,12 @@ void AWeaponRifle::Stop()
 	StopFire();
 }
 
+void AWeaponRifle::ResetAmmo()
+{
+	CurrentAmmo = DefaultAmmo;
+	OnAmmoChange.Broadcast(CurrentAmmo);
+}
+
 void AWeaponRifle::Fire()
 {
 	if (GetLocalRole() < ROLE_Authority)

@@ -5,11 +5,15 @@
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 
+
 // Sets default values
+
 AItemBase::AItemBase()
 {
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickUpMesh"));
 	RootComponent = PickUpMesh;
+
+	bCanOverlapped = false;
 
 	SetReplicates(true);
 
@@ -45,6 +49,11 @@ void AItemBase::ChangeState(EItemState NewState)
 
 		OnRep_ChangeState();
 	}
+}
+
+bool AItemBase::CanOverlapped()
+{
+	return bCanOverlapped;
 }
 
 void AItemBase::SetHiddenPickupMesh(bool isHideMesh)

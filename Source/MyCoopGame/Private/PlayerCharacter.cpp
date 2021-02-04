@@ -16,6 +16,7 @@
 #include "Components/HealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Weapon/WeaponAmmo.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -162,6 +163,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &APlayerCharacter::UnUseWeapon);
 
 	PlayerInputComponent->BindAction("Loot", EInputEvent::IE_Pressed, this, &APlayerCharacter::LootItem);
+
+	PlayerInputComponent->BindAction("ReloadAmmo", EInputEvent::IE_Pressed, this, &APlayerCharacter::Reload);
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const
@@ -333,6 +336,36 @@ void APlayerCharacter::ServerLootItem_Implementation()
 bool APlayerCharacter::ServerLootItem_Validate()
 {
 	return true;
+}
+
+void APlayerCharacter::Reload()
+{
+	if (nullptr == Weapon || nullptr==InventoryComp)
+	{
+		return;
+	}
+
+	TArray<AItemBase*> ResultItem= InventoryComp->GetItemsByType(EItemType::ItemType_Ammo);
+
+	if (0< ResultItem.Num())
+	{
+		int32 ItemCount = ResultItem.Num();
+		EAmmoType CurrentAmmoType= Weapon->GetAmmoType();
+		for (int32 ii = 0; ii < ItemCount; ++ii)
+		{
+			AWeaponAmmo* TargetAmmo= 	Cast<AWeaponAmmo>(ResultItem[ii]);
+			if (nullptr != TargetAmmo)
+			{
+				if (CurrentAmmoType == TargetAmmo->GetAmmoType())
+				{
+					Weapon->ResetAmmo();
+					InventoryComp->RemoveItem(ResultItem[ii]);
+					break;
+				}
+			}
+		}
+	}
+
 }
 
 void APlayerCharacter::UseWeapon()

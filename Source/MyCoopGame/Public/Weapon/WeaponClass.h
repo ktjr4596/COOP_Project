@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Items/ItemBase.h"
+#include "MyCoopGame/ItemType.h"
 #include "WeaponClass.generated.h"
 
 
@@ -34,9 +35,11 @@ public:
 public:
 	virtual void Start();
 	virtual void Stop();
+
+	virtual void ResetAmmo();
 public:
 	EWeaponType GetWeaponType() const;
-
+	EAmmoType GetAmmoType() const;
 protected:
 	virtual void OnChangeState() override;
 protected:
@@ -48,6 +51,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
+	EAmmoType AmmoType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<class UDamageType> DamageType;

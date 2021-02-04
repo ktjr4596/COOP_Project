@@ -62,6 +62,8 @@ protected:
 	UFUNCTION(Server, WithValidation, Reliable)
 	void ServerLootItem();
 
+	void Reload();
+
 protected:
 	void UseWeapon();
 	void UnUseWeapon();

@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "MyCoopGame/ItemType.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInventoryUpdated,class AActor*, OwningCharacter, class AItemBase* ,Item);
 
 
 class AItemBase;
@@ -31,10 +32,12 @@ public:
 
 	int32 GetSize() const;
 
-protected:
+	UFUNCTION(BlueprintCallable, Category="InventoryUtil")
+	TArray<AItemBase*> GetItemsByType(EItemType ItemType);
 
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
-	TArray<AItemBase*> ItemArray;
+	TArray< AItemBase*> ItemArray;
 
 	UPROPERTY(BlueprintAssignable, Category="Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
