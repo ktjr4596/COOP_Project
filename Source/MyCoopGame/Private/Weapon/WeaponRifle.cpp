@@ -21,6 +21,7 @@ AWeaponRifle::AWeaponRifle()
 
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 32.0f;
+
 }
 
 void AWeaponRifle::Start()
@@ -34,11 +35,22 @@ void AWeaponRifle::Stop()
 	StopFire();
 }
 
+void AWeaponRifle::ResetAmmo()
+{
+	CurrentAmmo = DefaultAmmo;
+	OnAmmoChange.Broadcast(CurrentAmmo);
+}
+
 void AWeaponRifle::Fire()
 {
 	if (GetLocalRole() < ROLE_Authority)
 	{
 		ServerFire();
+	}
+
+	if (CurrentAmmo <= 0)
+	{
+		return;
 	}
 
 	AActor* MyOwner = GetOwner();
@@ -93,8 +105,10 @@ void AWeaponRifle::Fire()
 		{
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEndPoint, FColor::Red, false, 5.0f, 0, 1.0f);
 		}
-
+		--CurrentAmmo;
+		
 		LastFireTime = GetWorld()->TimeSeconds;
+		OnAmmoChange.Broadcast(CurrentAmmo);
 
 	}
 }
@@ -177,6 +191,8 @@ void AWeaponRifle::BeginPlay()
 	Super::BeginPlay();
 
 	TimeBetweenShots = 60.0f / RateOfFire;
+
+	CurrentAmmo = DefaultAmmo;
 
 }
 

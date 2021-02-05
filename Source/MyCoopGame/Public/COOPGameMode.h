@@ -13,6 +13,7 @@ UCLASS()
 class MYCOOPGAME_API ACOOPGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+<<<<<<< HEAD
 	
 public:
 	void RunSpawnQuery(class UClass* SpawningActor);
@@ -30,5 +31,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EnvQuery")
 	class UEnvQuery* TargetEnvQuery;
+=======
+
+public:
+	ACOOPGameMode();
+
+protected:
+
+	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	UFUNCTION(BlueprintCallable, Category="GameState")
+	bool CheckAnyPlayerAlive();
+>>>>>>> 930afb352dbb6db38559785bb5c3a130b7016ffa
 
 };

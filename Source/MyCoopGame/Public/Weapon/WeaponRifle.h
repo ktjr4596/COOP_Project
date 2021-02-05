@@ -7,6 +7,8 @@
 #include "WeaponRifle.generated.h"
 
 
+
+
 class UParticleSystem;
 
 USTRUCT()
@@ -34,11 +36,14 @@ class MYCOOPGAME_API AWeaponRifle : public AWeaponClass
 	GENERATED_BODY()
 
 public:
+	friend class AWeaponAmmo;
 	AWeaponRifle();
 
 public:
 	virtual void Start() override;
 	virtual void Stop() override;
+
+	virtual void ResetAmmo() override final;
 protected:
 	void Fire();
 
@@ -92,4 +97,11 @@ protected:
 	float LastFireTime;
 
 	float TimeBetweenShots;
+
+	UPROPERTY(BlueprintReadOnly, Category="Ammo")
+	int32 CurrentAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
+	int32 DefaultAmmo;
+
 };

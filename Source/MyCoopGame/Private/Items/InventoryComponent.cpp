@@ -29,10 +29,14 @@ bool UInventoryComponent::AddItem(AItemBase * Item)
 	{
 		return false;
 	}
-	ItemArray.Add(Item);
+	if (true == Item->CanOverlapped())
+	{
+
+	}
+	ItemArray.Add( Item);
 	Item->SetOwningInventory(this);
 	Item->ChangeState(EItemState::ItemState_Inventory);
-	OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast(GetOwner(), Item);
 
 	return true;
 }
@@ -41,9 +45,9 @@ bool UInventoryComponent::RemoveItem(AItemBase * Item)
 {
 	if (nullptr != Item)
 	{
-		Item->ResetOwningInvetory();
-		ItemArray.RemoveSingle(Item);
-		OnInventoryUpdated.Broadcast();
+		Item->ResetOwningInvetory();     
+		ItemArray.Remove(Item);
+		OnInventoryUpdated.Broadcast(GetOwner(),Item);
 
 		return true;
 
@@ -54,6 +58,20 @@ bool UInventoryComponent::RemoveItem(AItemBase * Item)
 int32 UInventoryComponent::GetSize() const
 {
 	return ItemArray.Num();
+}
+
+TArray<AItemBase*> UInventoryComponent::GetItemsByType(EItemType ItemType)
+{
+	TArray<AItemBase*> Result;
+	for (int32 ii = 0; ii < ItemArray.Num(); ++ii)
+	{
+		if (ItemArray[ii]->GetItemType() == ItemType)
+		{
+			Result.Add( ItemArray[ii]);
+		}
+	}
+
+	return Result;
 }
 
 

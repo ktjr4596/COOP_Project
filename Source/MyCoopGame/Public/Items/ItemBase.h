@@ -4,19 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MyCoopGame/ItemType.h"
 #include "ItemBase.generated.h"
 
 class APlayerCharacter;
 class UStaticMeshComponent;
 class UTexture2D;
 class UInventoryComponent;
-
-UENUM()
-enum class EItemType
-{
-	ItemType_Cosumable,
-	ItemType_Equipable,
-};
 
 UENUM()
 enum class EItemState
@@ -49,6 +43,8 @@ public:
 	void ResetOwningInvetory();
 public:
 	void ChangeState(EItemState NewState);
+
+	bool CanOverlapped();
 protected:
 	void SetHiddenPickupMesh(bool isHideMesh);
 	
@@ -75,5 +71,10 @@ protected:
 
 	UPROPERTY()
 	UInventoryComponent* OwningInventory;
+
+	int32 ItemCount;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
+	bool bCanOverlapped;
 
 };

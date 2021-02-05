@@ -14,6 +14,10 @@ enum class EDebugDrawType : uint8
 	DebugDrawType_EyeTrace,
 };
 
+
+
+
+
 #define SURFACETYPE_FLESHDEFAULT			EPhysicalSurface::SurfaceType1
 #define SURFACETYPE_FLESHVLUNERABLE			EPhysicalSurface::SurfaceType2
 

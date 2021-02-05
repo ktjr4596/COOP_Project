@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponChanged,class APlayerCharacter*, Character,  class AWeaponClass*, ChangedWeapon);
+
 class UCameraComponent;
 class USpringArmComponent;
 class AItemBase;
@@ -60,6 +62,8 @@ protected:
 	UFUNCTION(Server, WithValidation, Reliable)
 	void ServerLootItem();
 
+	void Reload();
+
 protected:
 	void UseWeapon();
 	void UnUseWeapon();
@@ -68,6 +72,9 @@ protected:
 	void UseItem(AItemBase* Item);
 
 protected:
+	UPROPERTY(BlueprintAssignable, Category = "WeaponEvents")
+	FOnWeaponChanged OnWeaponChange;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
 

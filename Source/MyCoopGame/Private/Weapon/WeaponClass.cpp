@@ -32,9 +32,18 @@ void AWeaponClass::Stop()
 {
 }
 
+void AWeaponClass::ResetAmmo()
+{
+}
+
 EWeaponType AWeaponClass::GetWeaponType() const
 {
 	return WeaponType;
+}
+
+EAmmoType AWeaponClass::GetAmmoType() const
+{
+	return AmmoType;
 }
 
 void AWeaponClass::OnChangeState()

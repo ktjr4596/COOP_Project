@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Items/ItemBase.h"
+#include "MyCoopGame/ItemType.h"
 #include "WeaponClass.generated.h"
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, int32, TargetAmmo);
 
 UENUM(Blueprintable)
 enum class EWeaponType :uint8
@@ -34,12 +35,16 @@ public:
 public:
 	virtual void Start();
 	virtual void Stop();
+
+	virtual void ResetAmmo();
 public:
 	EWeaponType GetWeaponType() const;
-
+	EAmmoType GetAmmoType() const;
 protected:
 	virtual void OnChangeState() override;
 protected:
+	UPROPERTY(BlueprintAssignable, Category="AmmoEvent")
+	FOnAmmoChanged OnAmmoChange;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
@@ -47,12 +52,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType WeaponType;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
+	EAmmoType AmmoType;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<class UDamageType> DamageType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	float DamageBase;
 
-	
 
 };
