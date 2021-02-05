@@ -13,5 +13,16 @@ UCLASS()
 class MYCOOPGAME_API ACOOPGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ACOOPGameMode();
+
+protected:
+
+	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	UFUNCTION(BlueprintCallable, Category="GameState")
+	bool CheckAnyPlayerAlive();
+
 };
