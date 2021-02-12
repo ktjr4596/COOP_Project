@@ -84,7 +84,7 @@ void AWeaponRifle::Fire()
 			{
 				ActualDamage *= 4.0f;
 			}
-			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), this, DamageType);
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 
 
 			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint);

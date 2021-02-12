@@ -16,6 +16,11 @@ ASpawnTriggerBox::ASpawnTriggerBox()
 
 }
 
+UEnvQuery * ASpawnTriggerBox::GetEnvQuery()
+{
+	return TargetEnvQuery;
+}
+
 // Called when the game starts or when spawned
 void ASpawnTriggerBox::BeginPlay()
 {
@@ -42,7 +47,7 @@ void ASpawnTriggerBox::HandleOverlappedBox(UPrimitiveComponent * OverlappedCompo
 			 ACOOPGameMode* CoopGM = Cast<ACOOPGameMode>(GM);
 			 if (nullptr != CoopGM)
 			 {
-				 CoopGM->RunSpawnQuery(SpawningActor);
+				 CoopGM->RunSpawnQuery(this,SpawningActor);
 			 }
 		}
 	}

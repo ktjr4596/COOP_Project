@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AIModule/Classes/GenericTeamAgentInterface.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponChanged,class APlayerCharacter*, Character,  class AWeaponClass*, ChangedWeapon);
@@ -16,7 +17,7 @@ class UInventoryComponent;
 class UHealthComponent;
 
 UCLASS()
-class MYCOOPGAME_API APlayerCharacter : public ACharacter
+class MYCOOPGAME_API APlayerCharacter : public ACharacter ,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -71,9 +72,15 @@ protected:
 	UFUNCTION(BlueprintCallable, Category="Item")
 	void UseItem(AItemBase* Item);
 
+private:
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
 protected:
 	UPROPERTY(BlueprintAssignable, Category = "WeaponEvents")
 	FOnWeaponChanged OnWeaponChange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
+	FGenericTeamId TeamID;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;

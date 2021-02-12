@@ -16,8 +16,6 @@ enum class EDebugDrawType : uint8
 
 
 
-
-
 #define SURFACETYPE_FLESHDEFAULT			EPhysicalSurface::SurfaceType1
 #define SURFACETYPE_FLESHVLUNERABLE			EPhysicalSurface::SurfaceType2
 

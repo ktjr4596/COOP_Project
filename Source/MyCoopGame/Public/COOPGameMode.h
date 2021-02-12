@@ -13,10 +13,11 @@ UCLASS()
 class MYCOOPGAME_API ACOOPGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-<<<<<<< HEAD
-	
 public:
-	void RunSpawnQuery(class UClass* SpawningActor);
+	ACOOPGameMode();
+
+public:
+	void RunSpawnQuery(class ASpawnTriggerBox* TargetTrigger, class UClass* SpawningActor);
 
 protected:
 	virtual void BeginPlay() override;
@@ -29,12 +30,7 @@ protected:
 	TArray<class UClass*> SpawningActors;
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EnvQuery")
-	class UEnvQuery* TargetEnvQuery;
-=======
 
-public:
-	ACOOPGameMode();
 
 protected:
 
@@ -43,6 +39,5 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category="GameState")
 	bool CheckAnyPlayerAlive();
->>>>>>> 930afb352dbb6db38559785bb5c3a130b7016ffa
 
 };

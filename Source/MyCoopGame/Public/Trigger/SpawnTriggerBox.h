@@ -8,6 +8,7 @@
 
 
 class UBoxComponent;
+class UEnvQuery;
 
 UCLASS()
 class MYCOOPGAME_API ASpawnTriggerBox : public AActor
@@ -17,6 +18,9 @@ class MYCOOPGAME_API ASpawnTriggerBox : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASpawnTriggerBox();
+
+public:
+	UEnvQuery* GetEnvQuery();
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,5 +40,8 @@ protected:
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "SpawnedPoints")
 	TArray<class ATargetPoint*> SpanwedPoints;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "EnvQuery")
+	UEnvQuery * TargetEnvQuery;
 
 };

@@ -7,7 +7,7 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
-
+#include "Trigger/SpawnTriggerBox.h"
 
 
 ACOOPGameMode::ACOOPGameMode()
@@ -31,13 +31,13 @@ void ACOOPGameMode::BeginPlay()
 //
 //}
 
-void ACOOPGameMode::RunSpawnQuery(class UClass* SpawningActor)
+void ACOOPGameMode::RunSpawnQuery( ASpawnTriggerBox* TargetTrigger, class UClass* SpawningActor)
 {
 	if (nullptr != SpawningActor)
 	{
 		SpawningActors.Add(SpawningActor);
 	}
-	FEnvQueryRequest QueryRequest = FEnvQueryRequest(TargetEnvQuery, this);
+	FEnvQueryRequest QueryRequest = FEnvQueryRequest(TargetTrigger->GetEnvQuery(), TargetTrigger);
 	QueryRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &ACOOPGameMode::HandleQueryFinished);
 }
 

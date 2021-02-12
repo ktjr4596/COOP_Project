@@ -51,6 +51,7 @@ APlayerCharacter::APlayerCharacter()
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
+	
 
 	TargetItem = nullptr;
 }
@@ -394,6 +395,11 @@ void APlayerCharacter::UseItem(AItemBase * Item)
 
 	Item->Use(this);
 	Item->OnUse(this);
+}
+
+FGenericTeamId APlayerCharacter::GetGenericTeamId() const
+{
+	return TeamID;
 }
 
 
