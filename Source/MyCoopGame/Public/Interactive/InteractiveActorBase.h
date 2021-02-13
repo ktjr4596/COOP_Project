@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "InteractiveActorBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractActor);
+
+
 class APlayerCharacter;
 
 UCLASS(Abstract, BlueprintType,Blueprintable)
@@ -25,6 +28,9 @@ public:
 	virtual void Interact_Implementation(APlayerCharacter* Charcater);
 
 protected:
+	/** Broadcast when interact this actor */
+	FOnInteractActor OnInteract;
+
 	/** Actor's name for display  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interact")
 	FText ActorName;
@@ -32,4 +38,6 @@ protected:
 	/** Action name to find action mapping for display */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Action")
 	FText ActionName;
+
+
 };

@@ -8,7 +8,7 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponChanged,class APlayerCharacter*, Character,  class AWeaponClass*, ChangedWeapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractActorChanged, class AActor*, TargetActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInteractActorChanged, class AActor*, TargetActor, class AActor* , OldActor);
 
 class UCameraComponent;
 class USpringArmComponent;

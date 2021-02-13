@@ -18,6 +18,7 @@ AItemBase::AItemBase()
 
 	SetReplicates(true);
 
+	PickUpMesh->ComponentTags.Add(FName("outline"));
 }
 
 void AItemBase::Use(APlayerCharacter * OwningCharacter)

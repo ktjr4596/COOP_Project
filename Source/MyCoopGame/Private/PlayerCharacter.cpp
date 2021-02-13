@@ -127,12 +127,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FVector DistanceToTarget = PlayerLocation - TargetLocation;
 		}
 
-
-
 		if (TargetItem != HitResult.Actor)
 		{
+			AActor* OldTarget = TargetItem.Get();
 			TargetItem = HitResult.Actor;
-			OnInteractActorChanged.Broadcast(TargetItem.Get());
+			OnInteractActorChanged.Broadcast(TargetItem.Get(),OldTarget);
 		}
 	}
 

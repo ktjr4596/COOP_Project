@@ -10,8 +10,12 @@ AInteractiveActorBase::AInteractiveActorBase()
 
 
 	ActionName= FText::FromName("Interact");
+
+
 }
 
 void AInteractiveActorBase::Interact_Implementation(APlayerCharacter * Charcater)
 {
+	OnInteract.Broadcast();
 }
+
