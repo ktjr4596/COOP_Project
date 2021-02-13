@@ -7,8 +7,15 @@
 #include "SpawnTriggerBox.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTriggerOverlapped,bool, isStart);
+
+
+class AActor;
 class UBoxComponent;
 class UEnvQuery;
+class ATargetPoint;
+class ATriggeredActor;
+class AMonsterBaseClass;
 
 UCLASS()
 class MYCOOPGAME_API ASpawnTriggerBox : public AActor
@@ -22,6 +29,21 @@ public:
 public:
 	UEnvQuery* GetEnvQuery();
 
+	UEnvQuery* GetSpawnedActorTargetEnvQuery();
+
+	UFUNCTION()
+	void HandleStartWave(ASpawnTriggerBox* CurrentTrigger);
+
+	UFUNCTION()
+	void HandleEndWave(ASpawnTriggerBox* CurrentTrigger);
+
+	// Get target point spawned actor going to
+	ATargetPoint* GetSpawendActorTarget();
+
+	TArray<ATriggeredActor*> GetTriggeredActors();
+
+	AMonsterBaseClass* SpawnMonster(const FVector& TargetLocation);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -32,16 +54,30 @@ protected:
 
 protected:
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "SpanwedActor")
-	TSubclassOf<class AActor> SpawningActor;
+	UPROPERTY(BlueprintAssignable, Category="TriggerEvnets")
+	FOnTriggerOverlapped OnTriggerOverlapped;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="TriggerVolume")
-	UBoxComponent* TriggerBoxVolume;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "SpanwedActor")
+	TArray<TSubclassOf<AActor>> SpawningActor;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "SpawnedPoints")
-	TArray<class ATargetPoint*> SpanwedPoints;
+	TArray<ATargetPoint*> SpanwedPoints;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TriggerVolume")
+	UBoxComponent* TriggerBoxVolume;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "EnvQuery")
 	UEnvQuery * TargetEnvQuery;
+
+	UPROPERTY(EditInstanceOnly,BlueprintReadOnly, Category="Target")
+	ATargetPoint* SpawnedActorTarget;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="EnvQuery")
+	UEnvQuery* SpawnedTargetEnvQuery;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Trigger")
+	TArray< ATriggeredActor*> TriggeredActors;
+
+	bool bIsTriggered;
 
 };

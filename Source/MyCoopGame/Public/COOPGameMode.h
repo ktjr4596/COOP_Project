@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "COOPGameMode.generated.h"
 
+class UWaveManager;
+class ASpawnTriggerBox;
 /**
  * 
  */
@@ -25,11 +27,6 @@ protected:
 protected:
 	void HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result);
 
-protected:
-
-	TArray<class UClass*> SpawningActors;
-
-
 
 
 protected:
@@ -40,4 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="GameState")
 	bool CheckAnyPlayerAlive();
 
+	void StartWave(ASpawnTriggerBox* TargetTrigger);
+
+protected:
+	UWaveManager* WaveManager;
+	
 };

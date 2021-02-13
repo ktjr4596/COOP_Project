@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Interactive/InteractiveActorBase.h"
 #include "MyCoopGame/ItemType.h"
 #include "ItemBase.generated.h"
 
@@ -12,17 +12,21 @@ class UStaticMeshComponent;
 class UTexture2D;
 class UInventoryComponent;
 
-UENUM()
-enum class EItemState
+UENUM(BlueprintType)
+enum class EItemState : uint8
 {
-	ItemState_Field,
-	ItemState_Inventory,
-	ItemState_Equip,
+	ItemState_Field UMETA(DisplayName="Field"),
+
+	ItemState_Inventory UMETA(DisplayName="Inventory"),
+
+	ItemState_Equip UMETA(DisplayName="Equip"),
+
+	ItemState_Key UMETA(DisplayName="Key"),
 };
 
 
 UCLASS(Abstract,BlueprintType,Blueprintable)
-class MYCOOPGAME_API AItemBase : public AActor
+class MYCOOPGAME_API AItemBase : public AInteractiveActorBase
 {
 	GENERATED_BODY()
 	
@@ -35,6 +39,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnUse(APlayerCharacter* OwningCharacter);
+
+	virtual void Interact_Implementation(APlayerCharacter* Character) override;
 
 public:
 	EItemType GetItemType() const;
@@ -54,9 +60,6 @@ protected:
 	void OnRep_ChangeState();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
-	FText ItemName;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	UStaticMeshComponent * PickUpMesh;
 

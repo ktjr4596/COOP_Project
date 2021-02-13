@@ -27,6 +27,8 @@ class USkeletalMeshComponent;
 class UHealthComponent;
 class UBehaviorTree;
 class UAIPerceptionComponent;
+class UEnvQuery;
+class ATargetPoint;
 
 UCLASS()
 class MYCOOPGAME_API AMonsterBaseClass : public ACharacter, public IGenericTeamAgentInterface
@@ -41,6 +43,13 @@ public:
 	virtual void Tick(float DeltaSeconds)override;
 
 	virtual void GetActorEyesViewPoint(FVector& Location, FRotator& Rotation) const override;
+
+	bool IsDied();
+
+	UFUNCTION(BlueprintNativeEvent, Category="AI")
+	void ActivateActionByWave(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
+
+	virtual void ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
 
 protected:
 	// Called when the game starts or when spawned

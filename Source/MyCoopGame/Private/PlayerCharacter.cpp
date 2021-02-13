@@ -17,6 +17,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/WeaponAmmo.h"
+#include "Interactive/InteractiveActorBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -124,14 +125,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 			FVector PlayerLocation = GetActorLocation();
 			FVector TargetLocation = HitResult.Actor->GetActorLocation();
 			FVector DistanceToTarget = PlayerLocation - TargetLocation;
-			
-			// 블락된 아이템 텍스트 띄우기
-			TargetItem = HitResult.Actor;
-
 		}
-		else
+
+
+
+		if (TargetItem != HitResult.Actor)
 		{
-			TargetItem = nullptr;
+			TargetItem = HitResult.Actor;
+			OnInteractActorChanged.Broadcast(TargetItem.Get());
 		}
 	}
 
@@ -163,7 +164,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &APlayerCharacter::UnUseWeapon);
 
-	PlayerInputComponent->BindAction("Loot", EInputEvent::IE_Pressed, this, &APlayerCharacter::LootItem);
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &APlayerCharacter::Interact);
 
 	PlayerInputComponent->BindAction("ReloadAmmo", EInputEvent::IE_Pressed, this, &APlayerCharacter::Reload);
 }
@@ -176,6 +177,11 @@ FVector APlayerCharacter::GetPawnViewLocation() const
 	}
 
 	return Super::GetPawnViewLocation();
+}
+
+UInventoryComponent * APlayerCharacter::GetInventory()
+{
+	return InventoryComp;
 }
 
 void APlayerCharacter::OnHealthChanged(UHealthComponent * TargetHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
@@ -303,38 +309,34 @@ void APlayerCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
-void APlayerCharacter::LootItem()
+void APlayerCharacter::Interact()
 {
 	if (GetLocalRole() < ROLE_Authority)
 	{
-		ServerLootItem();
+		ServerInteract();
 	}
 	if (nullptr != TargetItem)
 	{
 		AActor* CurrentTarget = TargetItem.Get();
-		if (true == CurrentTarget->GetClass()->IsChildOf(AItemBase::StaticClass()))
+	
+		if (nullptr!=CurrentTarget && true == CurrentTarget->GetClass()->IsChildOf(AInteractiveActorBase::StaticClass()))
 		{
-
-			AItemBase* CurrentItem = Cast<AItemBase>(CurrentTarget);
-			if (nullptr == CurrentItem)
+			AInteractiveActorBase* CurrentTargetActor = Cast<AInteractiveActorBase>(CurrentTarget);
+			if (nullptr != CurrentTargetActor)
 			{
-				return;
+				CurrentTargetActor->Interact(this);
 			}
-			InventoryComp->AddItem(CurrentItem);
-
-
 		}
-		
 	}
 }
 
-void APlayerCharacter::ServerLootItem_Implementation()
+void APlayerCharacter::ServerInteract_Implementation()
 {
-	LootItem();
+	Interact();
 }
 
 
-bool APlayerCharacter::ServerLootItem_Validate()
+bool APlayerCharacter::ServerInteract_Validate()
 {
 	return true;
 }

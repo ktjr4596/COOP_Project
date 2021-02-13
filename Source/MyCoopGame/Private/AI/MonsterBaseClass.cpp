@@ -27,6 +27,10 @@ AMonsterBaseClass::AMonsterBaseClass()
 	SetReplicates(true);
 }
 
+void AMonsterBaseClass::ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint)
+{
+}
+
 // Called when the game starts or when spawned
 void AMonsterBaseClass::BeginPlay()
 {
@@ -43,7 +47,6 @@ void AMonsterBaseClass::BeginPlay()
 			HealthComp->OnHealthChanged.AddDynamic(this, &AMonsterBaseClass::HandleHealthChanged);
 
 			SetupInitialize();
-			//AIPerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this,&)
 		}
 	}
 	
@@ -69,7 +72,6 @@ void AMonsterBaseClass::HandleHealthChanged(UHealthComponent * TargetHealthComp,
 void AMonsterBaseClass::ResetTargetByTimer()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandleForResetTarget);
-	UE_LOG(LogTemp, Log, TEXT("ResetTarget"));
 	GetWorldTimerManager().SetTimer(TimerHandleForResetTarget, this, &AMonsterBaseClass::ResetTarget, TimeForResetTarget, false);
 }
 
@@ -90,7 +92,10 @@ void AMonsterBaseClass::GetActorEyesViewPoint(FVector & Location, FRotator & Rot
 	Location = GetMesh()->GetSocketLocation(TEXT("head"));
 
 	Rotation = GetActorRotation();
-	//Rotation.Yaw -= MeshComp->GetSocketTransform(TEXT("hhead"), ERelativeTransformSpace::RTS_ParentBoneSpace).Rotator().Roll;
+}
 
+bool AMonsterBaseClass::IsDied()
+{
+	return bIsDied;
 }
 

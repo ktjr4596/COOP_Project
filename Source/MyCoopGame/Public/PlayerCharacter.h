@@ -8,6 +8,7 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponChanged,class APlayerCharacter*, Character,  class AWeaponClass*, ChangedWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractActorChanged, class AActor*, TargetActor);
 
 class UCameraComponent;
 class USpringArmComponent;
@@ -38,6 +39,8 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 	
+	UInventoryComponent* GetInventory();
+
 public: 
 	void EquipWeapon(AItemBase* Item);
 
@@ -58,10 +61,10 @@ protected:
 	void BeginZoom();
 	void EndZoom();
 
-	void LootItem();
+	void Interact();
 
 	UFUNCTION(Server, WithValidation, Reliable)
-	void ServerLootItem();
+	void ServerInteract();
 
 	void Reload();
 
@@ -78,6 +81,9 @@ private:
 protected:
 	UPROPERTY(BlueprintAssignable, Category = "WeaponEvents")
 	FOnWeaponChanged OnWeaponChange;
+
+	UPROPERTY(BlueprintAssignable, Category="InteactEvents")
+	FOnInteractActorChanged OnInteractActorChanged;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
 	FGenericTeamId TeamID;

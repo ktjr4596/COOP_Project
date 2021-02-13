@@ -4,7 +4,8 @@
 #include "Items/ItemBase.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
-
+#include "PlayerCharacter.h"
+#include "Items/InventoryComponent.h"
 
 // Sets default values
 
@@ -21,6 +22,18 @@ AItemBase::AItemBase()
 
 void AItemBase::Use(APlayerCharacter * OwningCharacter)
 {
+}
+
+void AItemBase::Interact_Implementation(APlayerCharacter * Character)
+{
+	if (nullptr != Character)
+	{
+		UInventoryComponent* InventoryComp= Character->GetInventory();
+		if (nullptr != InventoryComp)
+		{
+			InventoryComp->AddItem(this);
+		}
+	}
 }
 
 EItemType AItemBase::GetItemType() const
