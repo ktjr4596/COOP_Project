@@ -5,17 +5,18 @@
 #include "CoreMinimal.h"
 
 
-	UENUM(BlueprintType, Blueprintable)
-	enum class EPlayerActionName : uint8
-	{
-		ActionName_Crouch = 0,
-		ActionName_Jump,
-		ActionName_Zoom,
-		ActionName_Fire,
-		ActionName_Interact,
-		ActionName_ReloadAmmo,
-		ActionName_OpenInventory,
-	};
+UENUM(BlueprintType, Blueprintable)
+enum class EPlayerActionName : uint8
+{
+	ActionName_Crouch = 0,
+	ActionName_Jump,
+	ActionName_Zoom,
+	ActionName_Fire,
+	ActionName_Interact,
+	ActionName_ReloadAmmo,
+	ActionName_OpenInventory,
+};
+
 namespace PlayerActionNames
 {
 	typedef TMap<EPlayerActionName, FName> ActionMap;
