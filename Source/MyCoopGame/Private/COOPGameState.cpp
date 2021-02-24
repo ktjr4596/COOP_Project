@@ -7,7 +7,7 @@
 
 void ACOOPGameState::SetGameState(EGameState NewState)
 {
-	if (GetLocalRole() == ROLE_Authority)
+	if (ROLE_Authority == GetLocalRole())
 	{
 		if (CurrentGameState != NewState)
 		{
@@ -20,7 +20,7 @@ void ACOOPGameState::SetGameState(EGameState NewState)
 
 void ACOOPGameState::SetGameProgress(EGameProgress NewProgress)
 {
-	if (GetLocalRole() == ROLE_Authority)
+	if (ROLE_Authority == GetLocalRole())
 	{
 		if (CurrentGameProgress != NewProgress)
 		{
