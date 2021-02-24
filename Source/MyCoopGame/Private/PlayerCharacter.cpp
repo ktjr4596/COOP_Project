@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/InputSettings.h"
 #include "Weapon/WeaponClass.h"
 #include "Items/ItemBase.h"
 #include "Engine/World.h"
@@ -15,9 +16,14 @@
 #include "MyCoopGame/Public/Items/InventoryComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/WeaponAmmo.h"
 #include "Interactive/InteractiveActorBase.h"
+#include "Blueprint/UserWidget.h"
+#include "PlayerActionNames.h"
+
+
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -37,9 +43,14 @@ APlayerCharacter::APlayerCharacter()
 	FRotator InitRoation(0.0f, -90.0f, 0.0f);
 	FVector InitLocation(0.0f, 0.0f, -80.0f);
 	GetMesh()->SetRelativeLocationAndRotation(InitLocation, InitRoation);
-	
+
 	// Set Character can crouch
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	NearItemInteractSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractSphere"));
+	NearItemInteractSphere->SetupAttachment(GetMesh());
+
+	NearItemInteractSphere->SetSphereRadius(500.0f);
 
 	bHasWeapon = false;
 
@@ -53,6 +64,8 @@ APlayerCharacter::APlayerCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
 	
+
+	InteractTraceRange = 200.0f;
 
 	TargetItem = nullptr;
 }
@@ -69,9 +82,14 @@ void APlayerCharacter::BeginPlay()
 
 
 	// Bind onhealthchange function to UHealthComponent
-	if (nullptr != HealthComp)
+	if (ROLE_Authority == GetLocalRole())
 	{
-		HealthComp->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
+		if (nullptr != HealthComp)
+		{
+			HealthComp->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
+		}
+
+
 	}
 
 }
@@ -93,7 +111,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	FRotator EyeRotator;
 	GetActorEyesViewPoint(EyeLocation,EyeRotator);
 
-	FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*10000.0f);
+	FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*InteractTraceRange);
 	FVector BoxHalfSize(20.0f, 20.0f, 20.0f);
 
 	TArray<AActor*> IgnoredActor;
@@ -101,30 +119,23 @@ void APlayerCharacter::Tick(float DeltaTime)
 	FHitResult HitResult;
 	if (static_cast<int32>(EDebugDrawType::DebugDrawType_EyeTrace) == DebugDrawType)
 	{
-		if (true == UKismetSystemLibrary::BoxTraceSingle(GetWorld(), EyeLocation, TraceEndPoint, BoxHalfSize, EyeRotator, ETraceTypeQuery::TraceTypeQuery1, false, IgnoredActor, EDrawDebugTrace::ForOneFrame, HitResult, true))
+		if (true == UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyeLocation, TraceEndPoint, 20.0f, ETraceTypeQuery::TraceTypeQuery5, false, IgnoredActor, EDrawDebugTrace::ForOneFrame, HitResult, true))
 		{
-			FVector PlayerLocation = GetActorLocation();
-			FVector TargetLocation=HitResult.Actor->GetActorLocation();
-			FVector DistanceToTarget = PlayerLocation - TargetLocation;
-	
-			// 블락된 아이템 텍스트 띄우기
 			UKismetSystemLibrary::PrintString(GetWorld(), HitResult.Actor->GetName(), true, false, FLinearColor::Red, 0.0f);
-			TargetItem = HitResult.Actor;
-			
 		}
-		else
+
+		if (TargetItem != HitResult.Actor)
 		{
-			TargetItem = nullptr;
+			AActor* OldTarget = TargetItem.Get();
+			TargetItem = HitResult.Actor;
+			OnInteractActorChanged.Broadcast(TargetItem.Get(), OldTarget);
 		}
 	}
 	else
 	{
-		if (true == UKismetSystemLibrary::BoxTraceSingle(GetWorld(), EyeLocation, TraceEndPoint, BoxHalfSize, EyeRotator, ETraceTypeQuery::TraceTypeQuery1, false, IgnoredActor, EDrawDebugTrace::None, HitResult, true))
+		if (true == UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyeLocation, TraceEndPoint, 20.0f, ETraceTypeQuery::TraceTypeQuery5, false, IgnoredActor, EDrawDebugTrace::None, HitResult, true))
 		{
-			// 블락된 아이템 텍스트 띄우기
-			FVector PlayerLocation = GetActorLocation();
-			FVector TargetLocation = HitResult.Actor->GetActorLocation();
-			FVector DistanceToTarget = PlayerLocation - TargetLocation;
+
 		}
 
 		if (TargetItem != HitResult.Actor)
@@ -143,29 +154,34 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+
+	const TMap<EPlayerActionName, FName>& ActionNames =  PlayerActionNames::GetActionNameMap();
+
 	// Bind Axis
-	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
+	 PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
 
 	// Bind Action
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginCrouch);
-	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &APlayerCharacter::EndCrouch);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Crouch], EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginCrouch);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Crouch], EInputEvent::IE_Released, this, &APlayerCharacter::EndCrouch);
 
-	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Jump], EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 
-	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginZoom);
-	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Released, this, &APlayerCharacter::EndZoom);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Zoom], EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginZoom);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Zoom], EInputEvent::IE_Released, this, &APlayerCharacter::EndZoom);
 
 
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
-	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &APlayerCharacter::UnUseWeapon);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Fire], EInputEvent::IE_Pressed, this, &APlayerCharacter::UseWeapon);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Fire], EInputEvent::IE_Released, this, &APlayerCharacter::UnUseWeapon);
 
-	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &APlayerCharacter::Interact);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Interact], EInputEvent::IE_Pressed, this, &APlayerCharacter::Interact);
 
-	PlayerInputComponent->BindAction("ReloadAmmo", EInputEvent::IE_Pressed, this, &APlayerCharacter::Reload);
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_ReloadAmmo], EInputEvent::IE_Pressed, this, &APlayerCharacter::Reload);
+
+	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_OpenInventory], EInputEvent::IE_Pressed, this, &APlayerCharacter::OpenInventory);
 }
 
 FVector APlayerCharacter::GetPawnViewLocation() const
@@ -183,10 +199,17 @@ UInventoryComponent * APlayerCharacter::GetInventory()
 	return InventoryComp;
 }
 
+bool APlayerCharacter::IsReloading()
+{
+	return bIsReloading;
+}
+
 void APlayerCharacter::OnHealthChanged(UHealthComponent * TargetHealthComp, float Health, float HealthDelta, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
 	if (Health <= 0.0f && false == bIsDied)
 	{
+
+		UnUseWeapon();
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DetachFromControllerPendingDestroy();
@@ -194,6 +217,14 @@ void APlayerCharacter::OnHealthChanged(UHealthComponent * TargetHealthComp, floa
 
 		bIsDied = true;
 	}
+}
+
+TArray<AActor*> APlayerCharacter::CheckOverlappedActors(TSubclassOf<AActor> TargetClass)
+{
+	TArray<AActor*> OutActors;
+	NearItemInteractSphere->GetOverlappingActors(OutActors, TargetClass);
+
+	return OutActors;
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -267,7 +298,6 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 
 		Weapon = TargetWeapon;
 		Weapon->SetOwner(this);
-
 		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, false);
 
 		Weapon->AttachToComponent(GetMesh(), AttachRules, FName("WeaponSocket"));
@@ -281,8 +311,7 @@ void APlayerCharacter::EquipWeapon(AItemBase* Item)
 	bUseControllerRotationYaw = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
-	InventoryComp->RemoveItem(Item);
-	Weapon->ChangeState(EItemState::ItemState_Equip);
+	InventoryComp->RemoveItem(Item,EItemState::ItemState_Equip);
 
 	OnWeaponChange.Broadcast(this,Weapon);
 }
@@ -342,6 +371,11 @@ bool APlayerCharacter::ServerInteract_Validate()
 
 void APlayerCharacter::Reload()
 {
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerReload();
+	}
+
 	if (nullptr == Weapon || nullptr==InventoryComp)
 	{
 		return;
@@ -361,13 +395,24 @@ void APlayerCharacter::Reload()
 				if (CurrentAmmoType == TargetAmmo->GetAmmoType())
 				{
 					Weapon->ResetAmmo();
-					InventoryComp->RemoveItem(ResultItem[ii]);
+					InventoryComp->RemoveItem(ResultItem[ii],EItemState::ItemState_None);
+					bIsReloading = true;
 					break;
 				}
 			}
 		}
 	}
 
+}
+
+void APlayerCharacter::ServerReload_Implementation()
+{
+	Reload();
+}
+
+bool APlayerCharacter::ServerReload_Validate()
+{
+	return true;
 }
 
 void APlayerCharacter::UseWeapon()
@@ -389,6 +434,11 @@ void APlayerCharacter::UnUseWeapon()
 
 void APlayerCharacter::UseItem(AItemBase * Item)
 {
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerUseItem(Item);
+	}
+
 	if (nullptr == Item)
 	{
 		return;
@@ -396,6 +446,53 @@ void APlayerCharacter::UseItem(AItemBase * Item)
 
 	Item->Use(this);
 	Item->OnUse(this);
+}
+
+void APlayerCharacter::ServerUseItem_Implementation(AItemBase* Item)
+{
+	UseItem(Item);
+}
+
+bool APlayerCharacter::ServerUseItem_Validate(AItemBase* Item)
+{
+	return true;
+}
+
+void APlayerCharacter::OpenInventory()
+{
+	AController* MyController = GetController();
+	if (nullptr != MyController)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(MyController);
+
+		if (nullptr != InventoryWidget)
+		{
+			InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			InventoryWidget = CreateWidget(PlayerController, InventoryWidgetClass);
+			InventoryWidget->AddToViewport();
+		}
+
+		PlayerController->SetInputMode(FInputModeUIOnly());
+		PlayerController->bShowMouseCursor = true;
+
+		InventoryWidget->SetFocus();
+
+		UInputSettings* InputSetting = UInputSettings::GetInputSettings();
+		TArray<FInputActionKeyMapping> KeyMappingResult;
+
+		FName ActionName = PlayerActionNames::GetActionName(EPlayerActionName::ActionName_OpenInventory);
+
+		InputSetting->GetActionMappingByName(ActionName, KeyMappingResult);
+
+		if (0 < KeyMappingResult.Num())
+		{
+			OnActionDetected.Broadcast(KeyMappingResult[0].Key);
+		}
+
+	}
 }
 
 FGenericTeamId APlayerCharacter::GetGenericTeamId() const
@@ -414,4 +511,5 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & 
 	DOREPLIFETIME(APlayerCharacter, bHasWeapon);
 	DOREPLIFETIME(APlayerCharacter, TargetItem);
 	DOREPLIFETIME(APlayerCharacter, bIsDied);
+	DOREPLIFETIME(APlayerCharacter, bIsReloading);
 }

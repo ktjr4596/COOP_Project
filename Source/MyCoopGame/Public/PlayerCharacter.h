@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponChanged,class APlayerCharacter*, Character,  class AWeaponClass*, ChangedWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInteractActorChanged, class AActor*, TargetActor, class AActor* , OldActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNearItemDetected);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActionDetected, struct FKey, KeyType);
 
 class UCameraComponent;
 class USpringArmComponent;
@@ -16,6 +18,11 @@ class AItemBase;
 class AWeaponClass;
 class UInventoryComponent;
 class UHealthComponent;
+class USphereComponent;
+class UUserWidget;
+
+
+
 
 UCLASS()
 class MYCOOPGAME_API APlayerCharacter : public ACharacter ,public IGenericTeamAgentInterface
@@ -41,6 +48,8 @@ public:
 	
 	UInventoryComponent* GetInventory();
 
+	bool IsReloading();
+
 public: 
 	void EquipWeapon(AItemBase* Item);
 
@@ -51,14 +60,20 @@ public:
 	UFUNCTION()
 	void OnHealthChanged(class UHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	UFUNCTION(BlueprintCallable, Category="Interact")
+	TArray<AActor*> CheckOverlappedActors(TSubclassOf<AActor> TargetClass);
+
 protected:
 	void MoveForward(float Value);
+
 	void MoveRight(float Value);
 
 	void BeginCrouch();
+
 	void EndCrouch();
 
 	void BeginZoom();
+
 	void EndZoom();
 
 	void Interact();
@@ -68,12 +83,21 @@ protected:
 
 	void Reload();
 
-protected:
+	UFUNCTION(Server,WithValidation,Reliable)
+	void ServerReload();
+
+	UFUNCTION(BlueprintCallable,Category="Weapon")
 	void UseWeapon();
+
 	void UnUseWeapon();
 
 	UFUNCTION(BlueprintCallable, Category="Item")
 	void UseItem(AItemBase* Item);
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void ServerUseItem(AItemBase* Item);
+
+	void OpenInventory();
 
 private:
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -82,8 +106,14 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "WeaponEvents")
 	FOnWeaponChanged OnWeaponChange;
 
-	UPROPERTY(BlueprintAssignable, Category="InteactEvents")
+	UPROPERTY(BlueprintAssignable, Category="InteractEvents")
 	FOnInteractActorChanged OnInteractActorChanged;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable , Category = "InteractEvents")
+	FOnNearItemDetected OnNearItemDetected;
+	
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="ActionEvents")
+	FOnActionDetected OnActionDetected;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
 	FGenericTeamId TeamID;
@@ -103,6 +133,17 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category="Health")
 	UHealthComponent* HealthComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interact")
+	USphereComponent* NearItemInteractSphere;
+
+	TWeakObjectPtr<UUserWidget> InventoryWidget;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Inventory")
+	TSubclassOf<UUserWidget> InventoryWidgetClass;
+
+	UPROPERTY(Replicated)
+	TWeakObjectPtr<AActor> TargetItem;
+
 	float DefaultFOV;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Zoom")
@@ -110,6 +151,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category="Zoom", meta=(ClampMin=0.1 , ClampMax=100.0))
 	float ZoomLerpSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Interact", meta=(ClampMin=1.0))
+	float InteractTraceRange;
 
 	UPROPERTY(BlueprintReadOnly, Category="Zoom")
 	bool bWantsToZoom;
@@ -123,9 +167,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Player")
 	bool bIsDied;
 
-	UPROPERTY(Replicated)
-	TWeakObjectPtr<AActor> TargetItem;
-
-	
-
+	UPROPERTY(BlueprintReadWrite, Replicated, Category="Weapon")
+	bool bIsReloading;
 };

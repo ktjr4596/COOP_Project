@@ -36,7 +36,6 @@ class MYCOOPGAME_API AWeaponRifle : public AWeaponClass
 	GENERATED_BODY()
 
 public:
-	friend class AWeaponAmmo;
 	AWeaponRifle();
 
 public:
@@ -89,6 +88,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="FleshFX")
 	UParticleSystem* FleshEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category="FX")
+	USoundBase* FireSoundEffect;
 
 	/** Firing Ammo per minute */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")

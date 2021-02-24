@@ -36,10 +36,6 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::HandleTakeAnyDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
-	if (Damage <= 0.0f)
-	{
-		return;
-	}
 
 	CurrentHealth= FMath::Clamp((CurrentHealth - Damage), 0.0f, DefaultHealth);
 

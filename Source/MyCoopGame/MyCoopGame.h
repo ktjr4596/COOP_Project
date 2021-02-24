@@ -20,3 +20,5 @@ enum class EDebugDrawType : uint8
 #define SURFACETYPE_FLESHVLUNERABLE			EPhysicalSurface::SurfaceType2
 
 #define COLLISION_WEAPON			ECC_GameTraceChannel1
+#define COLLISION_INTERACT			ECC_GameTraceChannel3
+#define COLLISION_ITEM				ECC_GameTraceChannel4

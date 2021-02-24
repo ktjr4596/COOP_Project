@@ -9,6 +9,7 @@
 #include "GameFramework/Actor.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "AI/MonsterBaseClass.h"
+#include "Engine/TargetPoint.h"
 
 // Sets default values for this component's properties
 UWaveManager::UWaveManager()
@@ -50,23 +51,29 @@ void UWaveManager::BeginPlay()
 	}
 }
 
-void UWaveManager::SpawnMonster(int32 SpawnCount)
+void UWaveManager::SpawnMonster(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints, int32 SpawnCount)
 {
 	if (false == bIsWaveStart)
 	{
 		return;
 	}
-	if (nullptr != CurrentSpawnedTrigger)
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+	for (int32 ii = 0; ii < SpawnCount; ++ii)
 	{
-		for (int32 ii = 0; ii < SpawnCount; ++ii)
+		int32 PickedMonsterIndex = FMath::RandRange(0, SpawningActors.Num() - 1);
+		int32 PickedPointIndex = FMath::RandRange(0, TargetPoints.Num() - 1);
+
+		FVector SpawnedLocation = TargetPoints[PickedPointIndex]->GetActorLocation();
+
+		AMonsterBaseClass* SpawnedMonster = Cast<AMonsterBaseClass>(GetWorld()->SpawnActor(SpawningActors[PickedMonsterIndex], &SpawnedLocation, &FRotator::ZeroRotator, SpawnParams));
+
+		if (nullptr != SpawnedMonster)
 		{
-			FEnvQueryRequest QueryRequest = FEnvQueryRequest(CurrentSpawnedTrigger->GetEnvQuery(), CurrentSpawnedTrigger);
-			QueryRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &UWaveManager::HandleQueryFinished);
+			CurrentSpawnedMonsters.Add(SpawnedMonster);
 		}
 	}
-
-
-
 }
 
 void UWaveManager::HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result)
@@ -144,14 +151,30 @@ void UWaveManager::StartWave(ASpawnTriggerBox* TargetTrigger)
 	TimerDelegateFunc.BindUFunction(this,TEXT("SpawnMonster"), 2);
 
 	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandle_ForSpawn, TimerDelegateFunc,5.0f,true);
-	OnStartWave.Broadcast(CurrentSpawnedTrigger);
+	//OnStartWave.Broadcast(CurrentSpawnedTrigger);
+
+}
+
+void UWaveManager::Start(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints, int32 SpawnCount, float SpawnRate, bool bIsLoop)
+{
+	if (SpawningActors.Num()<1 ||  TargetPoints.Num()<1)
+	{
+		return;
+	}
+
+	bIsWaveStart = true;
+	FTimerDelegate TimerDelegateFunc;
+	TimerDelegateFunc.BindUFunction(this, TEXT("SpawnMonster"), SpawningActors, TargetPoints, SpawnCount);
+
+	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandle_ForSpawn, TimerDelegateFunc, SpawnRate, bIsLoop);
+	OnStartWave.Broadcast();
 
 }
 
 void UWaveManager::EndWave()
 {
 	GetOwner()->GetWorldTimerManager().ClearTimer(TimerHandle_ForSpawn);
-	OnEndWave.Broadcast(CurrentSpawnedTrigger);
+	//OnEndWave.Broadcast(CurrentSpawnedTrigger);
 	bIsWaveStart = false;
 }
 

@@ -21,15 +21,13 @@ public:
 public:
 	EAmmoType GetAmmoType() const ;
 
-protected:
-	virtual void OnChangeState() override;
 	
 protected:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Ammo")
 	int32 AmmoCount;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Ammo")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ammo")
 	EAmmoType AmmoType;
 
 

@@ -10,6 +10,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, int32, TargetAmmo);
 
+
 UENUM(Blueprintable)
 enum class EWeaponType :uint8
 {
@@ -18,6 +19,24 @@ enum class EWeaponType :uint8
 	WeaponType_Count
 };
 
+USTRUCT(BlueprintType,Blueprintable)
+struct FRecoilValues
+{
+	GENERATED_USTRUCT_BODY()
+
+	FRecoilValues()
+		:MinRecoilValue(0.0f)
+		,MaxRecoilValue(0.0f)
+	{
+	}
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category="Recoil")
+	float MinRecoilValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recoil")
+	float MaxRecoilValue;
+
+};
 
 
 /**
@@ -40,11 +59,15 @@ public:
 public:
 	EWeaponType GetWeaponType() const;
 	EAmmoType GetAmmoType() const;
+
 protected:
 	virtual void OnChangeState() override;
 protected:
 	UPROPERTY(BlueprintAssignable, Category="AmmoEvent")
 	FOnAmmoChanged OnAmmoChange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Recoil")
+	FRecoilValues RecoilValues;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* MeshComp;

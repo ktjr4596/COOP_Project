@@ -15,6 +15,8 @@ class UInventoryComponent;
 UENUM(BlueprintType)
 enum class EItemState : uint8
 {
+	ItemState_None UMETA(DisplayName="None"),
+
 	ItemState_Field UMETA(DisplayName="Field"),
 
 	ItemState_Inventory UMETA(DisplayName="Inventory"),
@@ -48,9 +50,15 @@ public:
 	void SetOwningInventory(UInventoryComponent* TargetInventory);
 	void ResetOwningInvetory();
 public:
+	UFUNCTION(BlueprintCallable ,Category="Item")
 	void ChangeState(EItemState NewState);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerChangeState(EItemState NewState);
+
 	bool CanOverlapped();
+
+	int32 GetItemID();
 protected:
 	void SetHiddenPickupMesh(bool isHideMesh);
 	
@@ -69,15 +77,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	EItemType ItemType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing=OnRep_ChangeState, Category = "Item")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, ReplicatedUsing= OnRep_ChangeState, Category = "Item")
 	EItemState ItemState;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category="Item")
 	UInventoryComponent* OwningInventory;
 
-	int32 ItemCount;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	int32 ItemID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	bool bCanOverlapped;
+
+public:
+	UFUNCTION(BlueprintPure, Category="Item")
+	static int32 GetItemID_None();
+
+	static const int32 ItemID_None;
 
 };

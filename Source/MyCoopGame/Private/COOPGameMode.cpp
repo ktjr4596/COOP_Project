@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Trigger/SpawnTriggerBox.h"
+#include "AI/MonsterBaseClass.h"
 #include "WaveManager.h"
 
 ACOOPGameMode::ACOOPGameMode()
@@ -29,13 +30,15 @@ void ACOOPGameMode::BeginPlay()
 void ACOOPGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	if (false == CheckAnyPlayerAlive())
+	if (nullptr!= GameState && (0 < GameState->PlayerArray.Num()))
 	{
-		ACOOPGameState* MyState = Cast<ACOOPGameState>(GameState);
-		if (true==ensure(MyState))
+		if (false == CheckAnyPlayerAlive())
 		{
-			MyState->SetGameState(EGameState::GameState_GameOver);
+			ACOOPGameState* MyState = Cast<ACOOPGameState>(GameState);
+			if (true == ensure(MyState))
+			{
+				MyState->SetGameState(EGameState::GameState_GameOver);
+			}
 		}
 	}
 }
@@ -59,10 +62,11 @@ bool ACOOPGameMode::CheckAnyPlayerAlive()
 	return false;
 }
 
-void ACOOPGameMode::StartWave(ASpawnTriggerBox* TargetTrigger)
+
+void ACOOPGameMode::StartWave(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints, int32 SpawnCount, float SpawnRate, bool bIsLoop)
 {
 	if (nullptr != WaveManager)
 	{
-		WaveManager->StartWave(TargetTrigger);
+		WaveManager->Start(SpawningActors,TargetPoints,SpawnCount,SpawnRate,bIsLoop);
 	}
 }

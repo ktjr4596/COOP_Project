@@ -8,6 +8,10 @@
 
 class UWaveManager;
 class ASpawnTriggerBox;
+class UEnvQuery;
+
+
+
 /**
  * 
  */
@@ -17,29 +21,23 @@ class MYCOOPGAME_API ACOOPGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	ACOOPGameMode();
-
 public:
-	void RunSpawnQuery(class ASpawnTriggerBox* TargetTrigger, class UClass* SpawningActor);
+	UFUNCTION(BlueprintCallable, Category = "GameState")
+	bool CheckAnyPlayerAlive();
+
+	UFUNCTION(BlueprintCallable, Category = "Wave")
+	void StartWave(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints, int32 SpawnCount, float SpawnRate, bool bIsLoop);
 
 protected:
 	virtual void BeginPlay() override;
 	
 protected:
-	void HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result);
-
-
-
-protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-public:
-	UFUNCTION(BlueprintCallable, Category="GameState")
-	bool CheckAnyPlayerAlive();
 
-	void StartWave(ASpawnTriggerBox* TargetTrigger);
 
 protected:
 	UWaveManager* WaveManager;
-	
+
 };

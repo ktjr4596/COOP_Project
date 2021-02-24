@@ -26,18 +26,35 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool AddItem(AItemBase* Item);
-	bool RemoveItem(AItemBase* Item);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAddItem(AItemBase* Item);
+
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	bool RemoveItem(AItemBase* Item, EItemState TargetState);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRemoveItem(AItemBase* Item, EItemState TargetState);
+
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	int32 GetSize() const;
 
 	UFUNCTION(BlueprintCallable, Category="InventoryUtil")
 	TArray<AItemBase*> GetItemsByType(EItemType ItemType);
 
 protected:
+	int32* FindItemCountMap(int32 ItemID);
+
+	UFUNCTION(BlueprintPure, Category="Inventory")
+	int32 GetItemCount(int32 ItemID);
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
 	TArray< AItemBase*> ItemArray;
+
+	TMap<int32, int32> ItemCountMap;
 
 	UPROPERTY(BlueprintAssignable, Category="Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
@@ -47,7 +64,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 Capacity;
-
 
 	
 };

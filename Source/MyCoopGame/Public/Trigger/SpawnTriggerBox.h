@@ -32,10 +32,10 @@ public:
 	UEnvQuery* GetSpawnedActorTargetEnvQuery();
 
 	UFUNCTION()
-	void HandleStartWave(ASpawnTriggerBox* CurrentTrigger);
+	void HandleStartWave();
 
 	UFUNCTION()
-	void HandleEndWave(ASpawnTriggerBox* CurrentTrigger);
+	void HandleEndWave();
 
 	// Get target point spawned actor going to
 	ATargetPoint* GetSpawendActorTarget();

@@ -11,6 +11,11 @@
 #include "Perception/PawnSensingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
+#include "COOPGameMode.h"
+#include "EnvironmentQuery/EnvQueryManager.h"
+#include "DrawDebugHelpers.h"
+#include "Items/ItemBase.h"
 
 // Sets default values
 AMonsterBaseClass::AMonsterBaseClass()
@@ -29,6 +34,22 @@ AMonsterBaseClass::AMonsterBaseClass()
 
 void AMonsterBaseClass::ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint)
 {
+}
+
+void AMonsterBaseClass::HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result)
+{
+	if (true == Result->IsSuccsessful())
+	{
+		TArray<FVector> OutLocations;
+		Result->GetAllAsLocations(OutLocations);
+
+		if (0 < DropItemArray.Num())
+		{
+			int32 SelectedIndex= FMath::RandRange(0, DropItemArray.Num() - 1);
+
+			GetWorld()->SpawnActor(DropItemArray[SelectedIndex], &OutLocations[0]);
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -62,6 +83,10 @@ void AMonsterBaseClass::HandleHealthChanged(UHealthComponent * TargetHealthComp,
 		bIsDied = true;
 
 		MonsterState = EMyMonsterState::MonsterState_Dead;
+
+		FEnvQueryRequest QueryRequest = FEnvQueryRequest(DropItemQuery, this);
+
+		QueryRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AMonsterBaseClass::HandleQueryFinished);
 
 		DetachFromControllerPendingDestroy();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -99,3 +124,14 @@ bool AMonsterBaseClass::IsDied()
 	return bIsDied;
 }
 
+void AMonsterBaseClass::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMonsterBaseClass, bIsDied);
+	DOREPLIFETIME(AMonsterBaseClass, MonsterState);
+	DOREPLIFETIME(AMonsterBaseClass, bIsAttacking);
+	DOREPLIFETIME(AMonsterBaseClass, AttackMotionType);
+	DOREPLIFETIME(AMonsterBaseClass, TargetActor);
+
+}

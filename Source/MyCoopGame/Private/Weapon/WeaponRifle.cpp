@@ -11,6 +11,8 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerCharacter.h"
+#include "Perception/AISense_Hearing.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for weapons"), ECVF_Cheat);
@@ -53,9 +55,14 @@ void AWeaponRifle::Fire()
 		return;
 	}
 
-	AActor* MyOwner = GetOwner();
+	APlayerCharacter* MyOwner = Cast<APlayerCharacter>( GetOwner());
 	if (nullptr != MyOwner)
 	{
+		if (true == MyOwner->IsReloading())
+		{
+			return;
+		}
+
 		FVector EyeLocation;
 		FRotator EyeRotator;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotator);
@@ -86,13 +93,15 @@ void AWeaponRifle::Fire()
 			}
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 
-
 			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint);
 
 			TraceEndPoint = HitResult.ImpactPoint;
 		}
 
 		PlayFireEffect();
+
+		float RecoilValue = -FMath::FRandRange(RecoilValues.MinRecoilValue, RecoilValues.MaxRecoilValue);
+		MyOwner->AddControllerPitchInput(RecoilValue);
 
 		if (ROLE_Authority == GetLocalRole())
 		{
@@ -132,7 +141,18 @@ void AWeaponRifle::PlayFireEffect()
 {
 	PlayMuzzleEffect();
 
+	if (nullptr != FireSoundEffect)
+	{
+		FVector MuzzleLocation= MeshComp->GetSocketLocation(MuzzleSocketName);
+		UGameplayStatics::PlaySoundAtLocation(this, FireSoundEffect, MuzzleLocation);
+
+		UAISense_Hearing::ReportNoiseEvent(this, GetActorLocation(), 1.0f, this);
+	}
+
+
 	APawn* MyOwner = Cast<APawn>( GetOwner());
+
+
 
 	if (nullptr != MyOwner)
 	{

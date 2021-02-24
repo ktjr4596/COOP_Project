@@ -6,10 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "InteractiveActorBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractActor, class AInteractiveActorBase*, TargetActor);
 
 
 class APlayerCharacter;
+class ATriggeredActor;
 
 UCLASS(Abstract, BlueprintType,Blueprintable)
 class MYCOOPGAME_API AInteractiveActorBase : public AActor
@@ -27,9 +28,16 @@ public:
 
 	virtual void Interact_Implementation(APlayerCharacter* Charcater);
 
+	UFUNCTION(BlueprintCallable, Category="Interact")
+	void BroadCastNotify();
+
 protected:
 	/** Broadcast when interact this actor */
+	UPROPERTY(BlueprintAssignable,Category="InteractEvents")
 	FOnInteractActor OnInteract;
+
+	UPROPERTY(EditInstanceOnly, Category = "Interact")
+	TArray< ATriggeredActor*> TriggeredActors;
 
 	/** Actor's name for display  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interact")
@@ -39,5 +47,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Action")
 	FText ActionName;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Interact")
+	FText InteractText;
+
+	UPROPERTY(BlueprintReadWrite, Category="Interact")
+	bool bIsStartInteract;
+	
 
 };

@@ -18,10 +18,29 @@ void ACOOPGameState::SetGameState(EGameState NewState)
 	}
 }
 
+void ACOOPGameState::SetGameProgress(EGameProgress NewProgress)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		if (CurrentGameProgress != NewProgress)
+		{
+			EGameProgress OldProgress = CurrentGameProgress;
+			CurrentGameProgress = NewProgress;
+			OnRep_GameProgressChanged(OldProgress);
+		}
+
+	}
+}
+
 void ACOOPGameState::OnRep_GameStateChanged(EGameState OldState)
 {
 
 	OnGameStateChanged(CurrentGameState, OldState);
+}
+
+void ACOOPGameState::OnRep_GameProgressChanged(EGameProgress OldProgress)
+{
+	OnGameProgressChanged(CurrentGameProgress, OldProgress);
 }
 
 
@@ -30,4 +49,5 @@ void ACOOPGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACOOPGameState, CurrentGameState);
+	DOREPLIFETIME(ACOOPGameState, CurrentGameProgress);
 }

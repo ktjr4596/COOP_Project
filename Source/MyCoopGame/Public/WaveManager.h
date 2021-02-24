@@ -6,14 +6,16 @@
 #include "Components/ActorComponent.h"
 #include "WaveManager.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveStart, class ASpawnTriggerBox*, CurrentTrigger);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveEnd,class ASpawnTriggerBox*, CurrentTrigger);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWaveStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWaveEnd);
 
 
 
 
 class AMonsterBaseClass;
 class ASpawnTriggerBox;
+class ATargetPoint;
+class UEnvQuery;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MYCOOPGAME_API UWaveManager : public UActorComponent
@@ -32,13 +34,15 @@ public:
 public:
 	void StartWave(ASpawnTriggerBox* TargetTrigger);
 
+	void Start(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints, int32 SpawnCount,float SpawnRate,bool bIsLoop);
+
 	void EndWave();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void SpawnMonster(int32 SpawnCount);
+	void SpawnMonster(const TArray<UClass*>& SpawningActors, const TArray<AActor*>& TargetPoints,int32 SpawnCount);
 
 	void HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result);
 

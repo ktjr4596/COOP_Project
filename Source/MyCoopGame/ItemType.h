@@ -9,9 +9,9 @@
 UENUM(BlueprintType)
 enum class EItemType :uint8
 {
-	ItemType_Cosumable,
-	ItemType_Equipable,
-	ItemType_Ammo,
+	ItemType_Cosumable UMETA(DisplayName="Cosumable"),
+	ItemType_Equipable UMETA(DisplayName="Equipable"),
+	ItemType_Ammo UMETA(DisplayName="Ammo"),
 };
 
 
@@ -21,3 +21,5 @@ enum class EAmmoType
 	AmmoType_None,
 	AmmoType_Rife,
 };
+
+

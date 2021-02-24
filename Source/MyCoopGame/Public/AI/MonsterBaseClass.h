@@ -29,6 +29,7 @@ class UBehaviorTree;
 class UAIPerceptionComponent;
 class UEnvQuery;
 class ATargetPoint;
+class AItemBase;
 
 UCLASS()
 class MYCOOPGAME_API AMonsterBaseClass : public ACharacter, public IGenericTeamAgentInterface
@@ -50,6 +51,9 @@ public:
 	void ActivateActionByWave(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
 
 	virtual void ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
+
+	void HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result);
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -87,7 +91,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception")
 	UAIPerceptionComponent* AIPerceptionComp;
 
-	UPROPERTY(BlueprintReadWrite, Category="Attack")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="DropItem")
+	UEnvQuery* DropItemQuery;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="DropItem")
+	TArray<TSubclassOf<AItemBase>> DropItemArray;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, Category="Attack")
 	class AActor* TargetActor;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Target")
@@ -96,11 +106,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Target")
 	float TimeForResetTarget;
 
-	UPROPERTY(BlueprintReadWrite, Category = "State")
+	UPROPERTY(Replicated, BlueprintReadWrite ,Category= "State")
+	int32 AttackMotionType;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "State")
 	EMyMonsterState MonsterState;
 
-	UPROPERTY(BlueprintReadOnly ,Category="State")
+	UPROPERTY(Replicated,BlueprintReadOnly ,Category="State")
 	bool bIsDied;
 
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "State")
+	bool bIsAttacking;
 
 };

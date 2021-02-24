@@ -48,14 +48,14 @@ EAmmoType AWeaponClass::GetAmmoType() const
 
 void AWeaponClass::OnChangeState()
 {
+	Super::OnChangeState();
+
 	switch (ItemState)
 	{
 	case EItemState::ItemState_Field:
-		SetHiddenPickupMesh(false);
 		MeshComp->SetHiddenInGame(true);
 		break;
 	case EItemState::ItemState_Inventory:
-		SetHiddenPickupMesh(true);
 		MeshComp->SetHiddenInGame(true);
 		break;
 	case EItemState::ItemState_Equip:

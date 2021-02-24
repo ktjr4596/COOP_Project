@@ -30,21 +30,14 @@ UEnvQuery * ASpawnTriggerBox::GetSpawnedActorTargetEnvQuery()
 	return SpawnedTargetEnvQuery;
 }
 
-void ASpawnTriggerBox::HandleStartWave(ASpawnTriggerBox* CurrentTrigger)
+void ASpawnTriggerBox::HandleStartWave()
 {
-	if (this != CurrentTrigger)
-	{
-		return;
-	}
 	OnTriggerOverlapped.Broadcast(true);
 }
 
-void ASpawnTriggerBox::HandleEndWave(ASpawnTriggerBox* CurrentTrigger)
+void ASpawnTriggerBox::HandleEndWave()
 {
-	if (this != CurrentTrigger)
-	{
-		return;
-	}
+
 	OnTriggerOverlapped.Broadcast(false);
 }
 
@@ -108,7 +101,6 @@ void ASpawnTriggerBox::HandleOverlappedBox(UPrimitiveComponent * OverlappedCompo
 					// WaveParams.SpawningActors.Add(SpawningActor[ii]->StaticClass());
 				 //}
 				 //WaveParams.TargetEnvQuery = TargetEnvQuery;
-				 CoopGM->StartWave(this);
 				 //CoopGM->RunSpawnQuery(this,SpawningActor);
 			 }
 		}
