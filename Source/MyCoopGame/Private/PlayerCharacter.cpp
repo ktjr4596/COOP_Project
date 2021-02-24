@@ -155,14 +155,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 
-	const TMap<EPlayerActionName, FName>& ActionNames =  PlayerActionNames::GetActionNameMap();
-
 	// Bind Axis
 	 PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::AddControllerYawInput);
+
+	const PlayerActionNames::ActionNameMap & ActionNames =  PlayerActionNames::GetActionNameMap();
 
 	// Bind Action
 	PlayerInputComponent->BindAction(ActionNames[EPlayerActionName::ActionName_Crouch], EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginCrouch);

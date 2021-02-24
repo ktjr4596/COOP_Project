@@ -19,10 +19,9 @@ enum class EPlayerActionName : uint8
 
 namespace PlayerActionNames
 {
-	typedef TMap<EPlayerActionName, FName> ActionMap;
+	using ActionNameMap = TMap<EPlayerActionName, FName>;
 
-
-	const ActionMap& GetActionNameMap();
+	const ActionNameMap& GetActionNameMap();
 
 	const FName& GetActionName(EPlayerActionName TargetAction);
 }

@@ -3,7 +3,7 @@
 namespace PlayerActionNames
 {
 
-	const ActionMap& GetActionNameMap()
+	const ActionNameMap& GetActionNameMap()
 	{
 		static TMap<EPlayerActionName, FName> PlayerActionMap = {
 			{EPlayerActionName::ActionName_Crouch,"Crouch"} ,
@@ -20,7 +20,7 @@ namespace PlayerActionNames
 
 	const FName& GetActionName(EPlayerActionName TargetAction)
 	{
-		const ActionMap& ActionNames= GetActionNameMap();
+		const ActionNameMap& ActionNames= GetActionNameMap();
 
 		return ActionNames[TargetAction];
 	}
