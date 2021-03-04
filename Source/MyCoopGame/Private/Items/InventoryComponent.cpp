@@ -40,15 +40,16 @@ bool UInventoryComponent::AddItem(AItemBase * Item)
 	if (true == Item->CanOverlapped())
 	{
 		int32 ItemID = Item->GetItemID();
-		int32* FindResult = FindItemCountMap(ItemID);
+		TArray<AItemBase*>* FindResult = FindItemCountMap(ItemID);
 		if (nullptr != FindResult)
 		{
-			++(*FindResult);
+			FindResult->Add(Item);
 		}
 		else
 		{
 			ItemArray.Add(Item);
-			ItemCountMap.Add(ItemID, 1);
+			TArray<AItemBase*> NewItemArray;
+			ItemCountMap.Add(ItemID, NewItemArray);
 		}
 	}
 	else
@@ -80,29 +81,34 @@ bool UInventoryComponent::RemoveItem(AItemBase * Item, EItemState TargetState)
 	}
 	if (nullptr != Item)
 	{
+		Item->ResetOwningInvetory();
+		Item->ChangeState(TargetState);
 		if (true == Item->CanOverlapped())
 		{
 			int32 ItemID = Item->GetItemID();
-			int32* FindResult = FindItemCountMap(ItemID);
+			TArray<AItemBase*>* FindResult = FindItemCountMap(ItemID);
 			if (nullptr != FindResult)
 			{
-				if (0 == (--(*FindResult)))
+				if (0 == FindResult->Num())
 				{
 					ItemCountMap.Remove(ItemID);
-					ItemArray.Remove(Item);
+				}
+				else 
+				{
+					AItemBase* LastItem = FindResult->Pop();
+					ItemArray.Add(LastItem);
+					int32 ItemIndex= ItemArray.IndexOfByKey(Item);
+					if (INDEX_NONE != ItemIndex)
+					{
+						ItemArray.Swap(ItemIndex, ItemArray.Num()-1);
+						ItemArray.Pop();
+					}
+					OnInventoryUpdated.Broadcast(GetOwner(), Item);
+					return true;
 				}
 			}
-			else
-			{
-				ItemArray.Remove(Item);
-			}
 		}
-		else
-		{
-			ItemArray.Remove(Item);
-		}
-		Item->ResetOwningInvetory();     
-		Item->ChangeState(TargetState);
+		ItemArray.Remove(Item);
 		OnInventoryUpdated.Broadcast(GetOwner(),Item);
 
 		return true;
@@ -140,14 +146,14 @@ TArray<AItemBase*> UInventoryComponent::GetItemsByType(EItemType ItemType)
 	return Result;
 }
 
-int32 * UInventoryComponent::FindItemCountMap(int32 ItemID)
+TArray<AItemBase*>* UInventoryComponent::FindItemCountMap(int32 ItemID)
 {
 	return ItemCountMap.Find(ItemID);
 }
 
 int32 UInventoryComponent::GetItemCount(int32 ItemID)
 {
-	int32* FindResult = FindItemCountMap(ItemID);
-	return (nullptr != FindResult ? *FindResult : AItemBase::ItemID_None);
+	const TArray<AItemBase*>* FindResult = FindItemCountMap(ItemID);
+	return (nullptr != FindResult ? FindResult->Num()+1 : AItemBase::ItemID_None);
 }
 

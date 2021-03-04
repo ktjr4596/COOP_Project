@@ -87,7 +87,6 @@ void UWaveManager::HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result
 			AMonsterBaseClass* SpawnedMonster= CurrentSpawnedTrigger->SpawnMonster(ResultLocations[0]);
 			if (nullptr!=SpawnedMonster)
 			{
-				SpawnedMonster->ActivateActionByWave(CurrentSpawnedTrigger->GetSpawnedActorTargetEnvQuery(), CurrentSpawnedTrigger->GetSpawendActorTarget() );
 				CurrentSpawnedMonsters.Add(SpawnedMonster);
 			}
 		}

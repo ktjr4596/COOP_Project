@@ -6,7 +6,7 @@
 #include "PlayerCharacter.h"
 #include "../MyCoopGame.h"
 #include "Components/StaticMeshComponent.h"
-
+#include "Items/InventoryComponent.h"
 
 AFood::AFood()
 {
@@ -20,10 +20,15 @@ AFood::AFood()
 
 void AFood::Use(APlayerCharacter* OwningCharacter)
 {
-	AActor* TargetActor = Cast<AActor>(OwningCharacter);
-	if (nullptr != TargetActor)
+	if (nullptr != OwningCharacter)
 	{
 		RecoveryHealth *= -1.0f;
-		UGameplayStatics::ApplyDamage(TargetActor, RecoveryHealth, nullptr, this, FoodType);
+		UGameplayStatics::ApplyDamage(OwningCharacter, RecoveryHealth, nullptr, this, FoodType);
+
+		UInventoryComponent* InventoryComp= OwningCharacter->GetInventory();
+		if (nullptr != InventoryComp)
+		{
+			InventoryComp->RemoveItem(this, EItemState::ItemState_None);
+		}
 	}
 }

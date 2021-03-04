@@ -421,7 +421,6 @@ void APlayerCharacter::UseWeapon()
 	{
 		Weapon->Start();
 	}
-
 }
 
 void APlayerCharacter::UnUseWeapon()

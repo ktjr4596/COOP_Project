@@ -68,7 +68,7 @@ void AWeaponRifle::Fire()
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotator);
 
 		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
-		FVector TraceEndPoint = EyeLocation + (EyeRotator.Vector()*10000.0f);
+		FVector TraceEndPoint = MuzzleLocation + (EyeRotator.Vector()*10000.0f);
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(MyOwner);
@@ -82,19 +82,14 @@ void AWeaponRifle::Fire()
 		if (true == GetWorld()->LineTraceSingleByChannel(HitResult, EyeLocation, TraceEndPoint, COLLISION_WEAPON, QueryParams))
 		{
 			AActor* HitActor = HitResult.GetActor();
-
 			HitSurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
-
 			float ActualDamage = DamageBase;
-
 			if (SURFACETYPE_FLESHVLUNERABLE == HitSurfaceType)
 			{
 				ActualDamage *= 4.0f;
 			}
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, EyeRotator.Vector(), HitResult, MyOwner->GetInstigatorController(), MyOwner, DamageType);
-
 			PlayImpactEffect(HitSurfaceType, HitResult.ImpactPoint);
-
 			TraceEndPoint = HitResult.ImpactPoint;
 		}
 
@@ -112,7 +107,7 @@ void AWeaponRifle::Fire()
 
 		if (static_cast<int32>(EDebugDrawType::DebugDrawType_Weapon) == DebugDrawType)
 		{
-			DrawDebugLine(GetWorld(), EyeLocation, TraceEndPoint, FColor::Red, false, 5.0f, 0, 1.0f);
+			DrawDebugLine(GetWorld(), MuzzleLocation, TraceEndPoint, FColor::Red, false, 5.0f, 0, 1.0f);
 		}
 		--CurrentAmmo;
 		

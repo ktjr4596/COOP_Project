@@ -45,7 +45,7 @@ public:
 	TArray<AItemBase*> GetItemsByType(EItemType ItemType);
 
 protected:
-	int32* FindItemCountMap(int32 ItemID);
+	TArray<AItemBase*>* FindItemCountMap(int32 ItemID);
 
 	UFUNCTION(BlueprintPure, Category="Inventory")
 	int32 GetItemCount(int32 ItemID);
@@ -54,13 +54,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory")
 	TArray< AItemBase*> ItemArray;
 
-	TMap<int32, int32> ItemCountMap;
+	TMap<int32, TArray<AItemBase*>> ItemCountMap;
 
 	UPROPERTY(BlueprintAssignable, Category="Inventory")
 	FOnInventoryUpdated OnInventoryUpdated;
-
-	UPROPERTY( BlueprintReadOnly,Category="Inventory")
-	int32 CurrentItemCount;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 Capacity;

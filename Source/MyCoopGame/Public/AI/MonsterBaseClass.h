@@ -47,11 +47,6 @@ public:
 
 	bool IsDied();
 
-	UFUNCTION(BlueprintNativeEvent, Category="AI")
-	void ActivateActionByWave(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
-
-	virtual void ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint);
-
 	void HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result);
 
 
@@ -72,6 +67,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent, Category="Target")
 	void ResetTarget();
+
+	UFUNCTION()
+	void OnRepMonsterDied();
 
 private:
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -112,7 +110,7 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "State")
 	EMyMonsterState MonsterState;
 
-	UPROPERTY(Replicated,BlueprintReadOnly ,Category="State")
+	UPROPERTY(ReplicatedUsing= OnRepMonsterDied,BlueprintReadOnly ,Category="State")
 	bool bIsDied;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "State")

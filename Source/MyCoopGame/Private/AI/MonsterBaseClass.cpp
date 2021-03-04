@@ -32,10 +32,6 @@ AMonsterBaseClass::AMonsterBaseClass()
 	SetReplicates(true);
 }
 
-void AMonsterBaseClass::ActivateActionByWave_Implementation(UEnvQuery* ActivateQuery, ATargetPoint* TargetPoint)
-{
-}
-
 void AMonsterBaseClass::HandleQueryFinished(TSharedPtr<struct FEnvQueryResult> Result)
 {
 	if (true == Result->IsSuccsessful())
@@ -81,15 +77,9 @@ void AMonsterBaseClass::HandleHealthChanged(UHealthComponent * TargetHealthComp,
 	if (Health <= 0.0f)
 	{
 		bIsDied = true;
-
-		MonsterState = EMyMonsterState::MonsterState_Dead;
-
-		FEnvQueryRequest QueryRequest = FEnvQueryRequest(DropItemQuery, this);
-
-		QueryRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AMonsterBaseClass::HandleQueryFinished);
+		OnRepMonsterDied();
 
 		DetachFromControllerPendingDestroy();
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetLifeSpan(10.0f);
 	}
 }
@@ -100,6 +90,17 @@ void AMonsterBaseClass::ResetTargetByTimer()
 	GetWorldTimerManager().SetTimer(TimerHandleForResetTarget, this, &AMonsterBaseClass::ResetTarget, TimeForResetTarget, false);
 }
 
+
+void AMonsterBaseClass::OnRepMonsterDied()
+{
+	MonsterState = EMyMonsterState::MonsterState_Dead;
+
+	FEnvQueryRequest QueryRequest = FEnvQueryRequest(DropItemQuery, this);
+
+	QueryRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AMonsterBaseClass::HandleQueryFinished);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
 
 FGenericTeamId AMonsterBaseClass::GetGenericTeamId() const
 {
